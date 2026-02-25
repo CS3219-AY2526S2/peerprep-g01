@@ -81,5 +81,55 @@ exports.createAdmin = async(req, res) => {
 
         return res.status(500).json({ error: "Internal server error." });
     }
-    
 };
+
+exports.deleteAdmin = async(req, res) => {
+    const email = req.body.email;
+    const userId = req.body.userId;
+    const requestor = 'a0000000-0000-0000-0000-000000000001';
+
+    if(!email || !userId) {
+        return res.status(400).json({error: "email or userId input is required"});
+    }
+
+    try {
+        const adminResult = await db.query('SELECT "userId", "email" FROM "admin_authorisation" WHERE "userId" = $1', [userId]);
+
+        const userResult = await db.query('SELECT "userId", "role" FROM "user" WHERE "userId" = $1', [userId]);
+
+        if(adminResult.rowCount === 0) {
+            return res.status(400).json({error: "Admin does not exist"});
+        }
+
+        if(userResult.rowCount === 0) {
+            return res.status(400).json({error:"User does not exist"})
+        }
+
+        const targetUser = userResult.rows[0];
+
+        if(targetUser.userId === requestor) {
+            return res.status(400).json({error:"You cannot delete yourself"});
+        }
+
+        if(targetUser.role === '1') {
+            return res.status(400).json({error:"User is not an admin"});
+        }
+
+        await db.query('BEGIN');
+
+        await db.query('UPDATE "user" SET role = \'1\' WHERE "userId" = $1', [userId]);
+
+        await db.query('DELETE FROM "admin_authorisation" WHERE "userId" = $1', [userId]);
+
+        await db.query('COMMIT')
+
+        return res.status(200).json({
+            message: `User ${email} has been demoted to user status and admin has been deleted`
+        })
+
+    } catch(err) {
+        await db.query('ROLLBACK');
+        console.error("Demotion Error", err);
+        return res.status(500).json({ error: "Internal server error." });
+    }
+};    
