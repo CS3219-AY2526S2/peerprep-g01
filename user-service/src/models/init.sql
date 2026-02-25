@@ -27,12 +27,10 @@ CREATE TABLE "user" (
 CREATE TABLE "admin_authorisation" (
     "adminId" SERIAL PRIMARY KEY,
     "email" VARCHAR(200) NOT NULL UNIQUE,
-    "userId" UUID,                    -- Added per ERD
+    "userId" UUID NOT NULL,
     "invited_by" UUID,                -- Linked to userId in ERD
-    "isUsed" BOOLEAN DEFAULT FALSE, -- To prevent re-using an invite
-    "expiresAt" TIMESTAMP DEFAULT (CURRENT_TIMESTAMP + INTERVAL '48 hours'), -- Security!
     "created_at" TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_user_link FOREIGN KEY ("userId") REFERENCES "user"("userId") ON DELETE SET NULL,
+    CONSTRAINT fk_user_link FOREIGN KEY ("userId") REFERENCES "user"("userId") ON DELETE CASCADE,
     CONSTRAINT fk_inviter FOREIGN KEY ("invited_by") REFERENCES "user"("userId") ON DELETE SET NULL
 );
 
@@ -46,6 +44,7 @@ CREATE TABLE "question_history" (
     "sessionEndAt" TIMESTAMP,
     CONSTRAINT fk_user FOREIGN KEY ("userId") REFERENCES "user"("userId") ON DELETE CASCADE
 );
+
 -- -----------------------------------------------------------------------------
 -- SAMPLE DATA (Users)
 -- -----------------------------------------------------------------------------
@@ -60,16 +59,10 @@ ON CONFLICT ("email") DO NOTHING;
 -- -----------------------------------------------------------------------------
 -- SAMPLE DATA (Admin Authorisation)
 -- -----------------------------------------------------------------------------
-INSERT INTO "admin_authorisation" ("email", "userId", "invited_by", "isUsed", "expiresAt") VALUES
+INSERT INTO "admin_authorisation" ("email", "userId", "invited_by") VALUES
     -- Already Registered: isUsed is TRUE, userId is linked
-    ('admin.alice@peerprep.com', 'a0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001', TRUE, NOW() + INTERVAL '48 hours'),
-    ('admin.bob@peerprep.com', 'a0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001', TRUE, NOW() + INTERVAL '48 hours'),
-    
-    -- Pending Invite: isUsed is FALSE, userId is NULL
-    ('futureadmin@peerprep.com', NULL, 'a0000000-0000-0000-0000-000000000001', FALSE, NOW() + INTERVAL '48 hours'),
-    
-    -- Expired Invite (for testing your logic later):
-    ('expiredadmin@peerprep.com', NULL, 'a0000000-0000-0000-0000-000000000001', FALSE, NOW() - INTERVAL '1 hour')
+    ('admin.alice@peerprep.com', 'a0000000-0000-0000-0000-000000000002', 'a0000000-0000-0000-0000-000000000001'),
+    ('admin.bob@peerprep.com', 'a0000000-0000-0000-0000-000000000003', 'a0000000-0000-0000-0000-000000000001')
 ON CONFLICT ("email") DO NOTHING;
 
 -- -----------------------------------------------------------------------------
