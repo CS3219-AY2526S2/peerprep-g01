@@ -10,11 +10,24 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      # Use the absolute path to your models folder if relative fails
       - ./src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
       - pgdata:/var/lib/postgresql/data
     networks:
-      - peerprep-network
+      - user-network
+
+  app:
+    build: .
+    container_name: peerprep_user_app
+    restart: always
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:password123@db:5432/peerprep_db
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    networks:
+      - user-network
 
   pgadmin:
     image: dpage/pgadmin4
@@ -24,14 +37,14 @@ services:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
-      - "5050:80" # Access via http://localhost:5050
-    networks:
-      - peerprep-network
+      - "5050:80"
     depends_on:
       - db
+    networks:
+      - user-network
 
 networks:
-  peerprep-network:
+  user-network:
     driver: bridge
 
 volumes:
