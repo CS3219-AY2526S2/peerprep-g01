@@ -1,0 +1,86 @@
+services:
+  # ---------- User service ----------
+  user-db:
+    image: postgres:16-alpine
+    container_name: peerprep_user_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./user-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - user_pgdata:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
+
+  user-app:
+    build: ./user-service
+    container_name: peerprep_user_app
+    restart: always
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:password123@user-db:5432/peerprep_db
+    ports:
+      - "3001:3001"
+    depends_on:
+      - user-db
+    networks:
+      - peerprep-network
+
+  # ---------- Question bank ----------
+  questionbank-db:
+    image: postgres:16-alpine
+    container_name: peerprep_question_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_question_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./questionBank-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - qb_pgdata:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
+
+  questionbank-app:
+    build: ./questionBank-service
+    container_name: peerprep_questionbank_app
+    restart: always
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:password123@questionbank-db:5432/peerprep_question_db
+    ports:
+      - "3002:3002"
+    depends_on:
+      - questionbank-db
+    networks:
+      - peerprep-network
+
+  # ---------- pgAdmin (optional) ----------
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: peerprep_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - user-db
+      - questionbank-db
+    networks:
+      - peerprep-network
+
+networks:
+  peerprep-network:
+    driver: bridge
+
+volumes:
+  user_pgdata:
+  qb_pgdata:
