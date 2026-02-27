@@ -1,36 +1,51 @@
-import logo from "../assets/placeholder-logo.png";
-import {
-  Container,
-  Box,
-  Stack,
-  Typography,
-  TextField,
-  Button,
-} from "@mui/material";
+import logo from "../assets/peerprep-logo-nobg.png";
+import { Grid, Typography, Stack, Box, TextField, Button } from "@mui/material";
+
+const gridItem = {
+  display: "flex",
+  flexDirection: "column",
+  justifyContent: "center",
+  alignItems: "center",
+  padding: "1rem",
+};
 
 function LoginPage() {
   return (
-    <Container maxWidth="sm">
-      <Stack
+    <Grid container sx={{ width: "100vw", height: "100vh" }}>
+      <Grid
+        size={{ xs: 12, md: 6 }}
         sx={{
-          minHeight: "100vh",
-          alignItems: "center",
-          justifyContent: "center",
+          ...gridItem,
+          bgcolor: "primary.main",
+          display: { xs: "none", md: "flex" },
         }}
       >
-        <img src={logo} alt="logo image" style={{ width: 300 }} />
-        <Typography variant="subtitle1">
-          Real-time collaboration for real-world interviews at you fingertips
+        <img
+          src={logo}
+          alt="logo icon"
+          style={{ width: 350, filter: "invert(100%)" }}
+        />
+        <Typography
+          variant="subtitle1"
+          color="common.white"
+          sx={{ textAlign: "center" }}
+        >
+          Another session of grinding, comaraderie and crying awaits beyond
         </Typography>
-
-        <Typography variant="h5" sx={{ marginTop: "4rem" }}>
-          Create an account
+      </Grid>
+      <Grid size={{ xs: 12, md: 6 }} sx={{ ...gridItem, minWidth: 370 }}>
+        <Typography
+          variant="h3"
+          color="primary.main"
+          sx={{ margin: "2rem 0", fontWeight: 700 }}
+        >
+          Welcome back!
         </Typography>
         <Typography variant="body2" color="textSecondary">
-          Enter your email to sign up for this app
+          Login with your email and password
         </Typography>
 
-        <Stack sx={{ width: 350 }}>
+        <Stack sx={{ width: 300 }}>
           <form>
             <Box
               sx={{
@@ -43,6 +58,14 @@ function LoginPage() {
               <TextField
                 label="email@domain.com"
                 name="email"
+                type="email"
+                size="small"
+                fullWidth
+              ></TextField>
+              <TextField
+                label="password"
+                name="password"
+                type="password"
                 size="small"
                 fullWidth
               ></TextField>
@@ -51,29 +74,27 @@ function LoginPage() {
                 variant="contained"
                 fullWidth
                 sx={{
-                  bgcolor: "black",
+                  bgcolor: "common.black",
                   "&:hover": { bgcolor: "#333" },
                   textTransform: "none",
                   fontWeight: 300,
                   padding: "8px 14px",
                 }}
               >
-                Sign up with email
+                Login
               </Button>
             </Box>
           </form>
-
           <Typography
             variant="body2"
             color="textSecondary"
             sx={{ textAlign: "center", width: 300, alignSelf: "center" }}
           >
-            By clicking continue, you agree to our Terms of Service and Privacy
-            Policy
+            Don't have an account yet? Sign up with us here instead!
           </Typography>
         </Stack>
-      </Stack>
-    </Container>
+      </Grid>
+    </Grid>
   );
 }
 
