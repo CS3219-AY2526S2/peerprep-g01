@@ -1,12 +1,7 @@
-import SignUpPage from "../src/pages/SignUpPage";
-import LoginPage from "../src/pages/LoginPage";
+import AppRouter from "./routes/AppRouter";
 
 function App() {
-  return (
-    <>
-      <LoginPage />
-    </>
-  );
+  return <AppRouter />;
 }
 
 export default App;

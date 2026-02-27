@@ -55,7 +55,7 @@ function SignUpPage() {
                   bgcolor: "common.black",
                   "&:hover": { bgcolor: "#333" },
                   textTransform: "none",
-                  fontWeight: 300,
+                  fontWeight: 400,
                   padding: "8px 14px",
                 }}
               >
