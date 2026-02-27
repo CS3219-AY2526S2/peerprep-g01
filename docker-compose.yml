@@ -23,6 +23,7 @@ services:
     environment:
       PORT: 3001
       DATABASE_URL: postgresql://postgres:password123@user-db:5432/peerprep_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
     ports:
       - "3001:3001"
     depends_on:
