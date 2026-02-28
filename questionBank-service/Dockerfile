@@ -5,10 +5,12 @@ RUN npm install -g pnpm
 WORKDIR /app
 
 COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --prod
+# Install all dependencies including devDependencies for nodemon
+RUN pnpm install
 
 COPY . .
 
 EXPOSE 3002
 
-CMD ["node", "index.js"]
+# Run the dev script instead of direct node
+CMD ["pnpm", "run", "dev"]

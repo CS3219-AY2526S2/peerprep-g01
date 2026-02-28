@@ -26,6 +26,9 @@ services:
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
     ports:
       - "3001:3001"
+    volumes:
+      - ./user-service:/app
+      - /app/node_modules
     depends_on:
       - user-db
     networks:
@@ -57,6 +60,9 @@ services:
       DATABASE_URL: postgresql://postgres:password123@questionbank-db:5432/peerprep_question_db
     ports:
       - "3002:3002"
+    volumes:
+      - ./questionBank-service:/app
+      - /app/node_modules
     depends_on:
       - questionbank-db
     networks:
