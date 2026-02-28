@@ -9,6 +9,6 @@ RUN pnpm install --prod
 
 COPY . .
 
-EXPOSE 3002
+EXPOSE 3001
 
 CMD ["node", "index.js"]
