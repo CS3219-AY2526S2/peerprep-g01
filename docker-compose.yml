@@ -41,7 +41,7 @@ services:
       POSTGRES_PASSWORD: password123
       POSTGRES_DB: peerprep_question_db
     ports:
-      - "5434:5432"
+      - "5433:5432"
     volumes:
       - ./questionBank-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
       - qb_pgdata:/var/lib/postgresql/data

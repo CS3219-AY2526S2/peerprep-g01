@@ -23,7 +23,7 @@ exports.getAllQuestions = async (req, res) => {
       WHERE 1=1  
     `;
 
-    queryParams = []
+    const queryParams = []
 
     //Search by name
     if(search) {
@@ -73,5 +73,37 @@ exports.getAllQuestions = async (req, res) => {
   }
 };
 
-// exports.getQuestionById = async (req, res) => {
-// };
+exports.getQuestionById = async (req, res) => {
+  const questionId = req.params.questionId
+
+  if (!questionId) {
+    return res.status(400).json({ error: "questionId is required" });
+  }
+
+  try {
+    const result = await db.query(
+      `SELECT q.*, t."topicName"
+       FROM "question_bank" q
+       JOIN "topic" t ON t."topicId" = q."topicId"
+       WHERE q."questionId" = $1`,
+      [questionId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Question not found" });
+    }
+
+    return res.status(200).json({
+      status: "success",
+      data: result.rows[0],
+    });
+  } catch (err) {
+    console.log("Error fetching question ID", err);
+    return res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.addQuestion = async(req, res) => {
+  const {questionName, topicId, difficulty, description, publicTestCase, privateTestCase} = req.body;
+     
+};
