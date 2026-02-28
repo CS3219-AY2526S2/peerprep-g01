@@ -104,6 +104,48 @@ exports.getQuestionById = async (req, res) => {
 };
 
 exports.addQuestion = async(req, res) => {
-  const {questionName, topicId, difficulty, description, publicTestCase, privateTestCase} = req.body;
-     
+  const {
+    questionName, 
+    topicId, 
+    difficulty, 
+    description,
+    publicTestCase, 
+    privateTestCase} = req.body;
+
+  const createdBy = req.user?.userId || 'a0000000-0000-0000-0000-000000000001';
+
+  try {
+    const query = `
+      INSERT INTO "question_bank"
+      ("questionName", "topicId", "difficulty", "description", "publicTestCase", "privateTestCase", "createdBy")
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      RETURNING *;
+    `;
+
+    const values = [
+      questionName,
+      topicId,
+      difficulty,
+      description,
+      JSON.stringify(publicTestCase),
+      JSON.stringify(privateTestCase),
+      createdBy
+    ];
+    const result = await db.query(query, values);
+
+    res.status(201).json({
+      message: "Question created successfully",
+      data: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error("Error creating question:", err);
+    
+    // Handle unique constraint violation (e.g., duplicate question name)
+    if (err.code === '23505') {
+      return res.status(400).json({ error: "A question with this name already exists" });
+    }
+    
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
