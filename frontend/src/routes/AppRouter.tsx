@@ -6,6 +6,7 @@ import {
 } from "react-router-dom";
 import SignUp from "../pages/SignUpPage";
 import Login from "../pages/LoginPage";
+import UserHomePage from "../pages/UserHomePage";
 
 function AppRouter() {
   return (
@@ -14,6 +15,8 @@ function AppRouter() {
         <Route path="/login" element={<Login />} />
 
         <Route path="/signup" element={<SignUp />} />
+
+        <Route path="/home" element={<UserHomePage />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

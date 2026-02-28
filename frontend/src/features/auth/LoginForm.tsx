@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { Typography, Stack, Box, TextField, Button } from "@mui/material";
@@ -12,11 +12,18 @@ function LoginForm() {
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
     await login(email, password);
-    if (!error) navigate("/signup");
+    if (!error) navigate("/home");
   }
 
   return (
-    <Stack>
+    <Stack
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
       <Typography variant="body2" color="textSecondary">
         Login with your email and password
       </Typography>

@@ -33,9 +33,12 @@ function useAuth() {
       const { token, user } = mockLoginUser(email, password);
       localStorage.setItem("token", token);
       setUser(user);
-    } catch (err: any) {
-      setError(err.message);
-      console.log(error);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        console.log("An unexpected error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
