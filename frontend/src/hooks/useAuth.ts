@@ -11,9 +11,8 @@ function mockLoginUser(
       token: "mock-token-123",
       user: {
         userId: "1",
-        email,
-        password,
         userName: "testuser",
+        email,
         role: "User",
       },
     };
@@ -33,12 +32,14 @@ function useAuth() {
       const { token, user } = mockLoginUser(email, password);
       localStorage.setItem("token", token);
       setUser(user);
+      return true;
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);
       } else {
         console.log("An unexpected error occurred");
       }
+      return false;
     } finally {
       setIsLoading(false);
     }
