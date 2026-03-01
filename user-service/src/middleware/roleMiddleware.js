@@ -6,3 +6,4 @@ const adminOnlyMiddleware = (req, res, next) => {
         res.status(403).json({ error: "Access denied. Admin rights required." });
     }
 };
+module.exports = adminOnlyMiddleware;
