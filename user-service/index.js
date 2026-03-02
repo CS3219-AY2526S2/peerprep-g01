@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const userRoutes = require('./src/routes/userRoutes');
 const authRoutes = require('./src/routes/authRoutes');
-// const questionHistoryRoutes = require('./src/routes/questionHistoryRoutes');
+const questionHistoryRoutes = require('./src/routes/questionHistoryRoutes');
 const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
@@ -12,7 +12,7 @@ app.use(express.json());
 
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
-// app.use('/api/question_history', questionHistoryRoutes);
+app.use('/api/question_history', questionHistoryRoutes);
 app.use('/api/admins', adminRoutes)
 
 app.get('/health', (req, res) => {
