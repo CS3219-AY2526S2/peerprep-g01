@@ -1,24 +1,6 @@
 import { useState } from "react";
-import { type User } from "../types/user";
 import useAuthStore from "../store/authStore";
-
-function mockLoginUser(
-  email: string,
-  password: string,
-): { token: string; user: User } {
-  if (email === "test@test.com" && password === "password") {
-    return {
-      token: "mock-token-123",
-      user: {
-        userId: "1",
-        userName: "testuser",
-        email,
-        role: "User",
-      },
-    };
-  }
-  throw new Error("Invalid email or password");
-}
+import { loginUser } from "../services/userService";
 
 function useAuth() {
   const { setUser, clearUser } = useAuthStore();
@@ -29,7 +11,7 @@ function useAuth() {
     setIsLoading(true);
     setError(null);
     try {
-      const { token, user } = mockLoginUser(email, password);
+      const { token, user } = await loginUser(email, password);
       localStorage.setItem("token", token);
       setUser(user);
       return true;
