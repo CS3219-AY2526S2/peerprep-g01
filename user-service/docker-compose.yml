@@ -1,0 +1,52 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: peerprep_user_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - user-network
+
+  app:
+    build: .
+    container_name: peerprep_user_app
+    restart: always
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:password123@db:5432/peerprep_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    networks:
+      - user-network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: peerprep_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+    networks:
+      - user-network
+
+networks:
+  user-network:
+    driver: bridge
+
+volumes:
+  pgdata:
