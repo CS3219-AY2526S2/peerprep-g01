@@ -1,4 +1,4 @@
-import { type User } from "../types/user";
+import type User from "../types/user";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
