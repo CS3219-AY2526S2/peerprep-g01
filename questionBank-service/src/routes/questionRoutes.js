@@ -2,11 +2,13 @@ const express = require('express');
 const router = express.Router();
 const questionController = require('../controllers/questionController');
 
-// 1. Static routes go FIRST
+// Static routes first
 router.get('/', questionController.getAllQuestions);
-router.post('/add', questionController.addQuestion); // Move this up!
+router.post('/add', questionController.addQuestion);
 
-// 2. Dynamic/Parameter routes go LAST
+// Dynamic/parameter routes last
 router.get('/:questionId', questionController.getQuestionById);
+router.put('/:questionId', questionController.updateQuestion);
+router.delete('/:questionId', questionController.deleteQuestion);
 
 module.exports = router;
