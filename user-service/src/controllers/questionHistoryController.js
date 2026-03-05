@@ -155,4 +155,4 @@ const deleteHistory = async (req, res) => {
   }
 };
 
-module.exports = { getHistory, createHistory,deleteHistory };
+module.exports = { getHistory, createHistory, deleteHistory };
