@@ -131,4 +131,28 @@ const createHistory = async (req, res) => {
   }
 };
 
-module.exports = { getHistory, createHistory };
+// DELETE /question_history/:questionId — delete a history entry by questionId for the authenticated user
+const deleteHistory = async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const { questionId } = req.params;
+
+    const result = await db.query(
+      `DELETE FROM "question_history"
+       WHERE "userId" = $1 AND "questionId" = $2
+       RETURNING "historyId"`,
+      [userId, questionId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ success: false, message: 'History entry not found' });
+    }
+
+    return res.status(200).json({ success: true, message: 'History entry deleted successfully' });
+  } catch (err) {
+    console.error('DELETE /question_history/:questionId error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+module.exports = { getHistory, createHistory, deleteHistory };
