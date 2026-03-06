@@ -69,6 +69,19 @@ services:
     networks:
       - peerprep-network
 
+  # ---------- Frontend ----------
+  frontend:
+    build: ./frontend
+    container_name: peerprep_frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - user-app
+      - questionbank-app
+    networks:
+      - peerprep-network
+
   # ---------- pgAdmin (optional) ----------
   pgadmin:
     image: dpage/pgadmin4
