@@ -7,6 +7,7 @@ import {
 import SignUp from "../pages/SignUpPage";
 import Login from "../pages/LoginPage";
 import UserHomePage from "../pages/UserHomePage";
+import UserDirectoryPage from "../pages/UserDirectoryPage";
 
 function AppRouter() {
   return (
@@ -17,6 +18,8 @@ function AppRouter() {
         <Route path="/signup" element={<SignUp />} />
 
         <Route path="/home" element={<UserHomePage />} />
+
+        <Route path="/user-directory" element={<UserDirectoryPage />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
