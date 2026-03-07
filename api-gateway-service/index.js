@@ -48,21 +48,25 @@ app.use("/api/auth", createProxyMiddleware({
 app.use("/api/users", createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: { "^/": "/api/users/" },
 }));
 
 app.use("/api/question_history", createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: { "^/": "/api/question_history/" },
 }));
 
 app.use("/api/admins", createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: { "^/": "/api/admins/" },
 }));
 
 app.use("/api/questions", createProxyMiddleware({
     target: QUESTION_SERVICE_URL,
     changeOrigin: true,
+    pathRewrite: { "^/": "/api/questions/" },
 }));
 
 app.use((req, res) => {
