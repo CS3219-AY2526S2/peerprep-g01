@@ -69,21 +69,39 @@ services:
     networks:
       - peerprep-network
 
+  # ---------- ApiGateway --------
+  apigateway:
+    build: ./api-gateway-service
+    container_name: peerprep_apigateway
+    restart: always
+    environment:
+      PORT: 3000
+      FRONTEND_URL: http://localhost
+      USER_SERVICE_URL: http://user-app:3001
+      QUESTION_SERVICE_URL: http://questionbank-app:3002
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-app
+      - questionbank-app
+    networks:
+      - peerprep-network
+       
   # ---------- Frontend ----------
   frontend:
     build:
       context: ./frontend
       args:
-        - VITE_API_BASE_URL=http://localhost:3001
+        - VITE_API_BASE_URL=http://localhost:3000
     environment:
-      - VITE_API_BASE_URL=http://localhost:3001
+      - VITE_API_BASE_URL=http://localhost:3000
     container_name: peerprep_frontend
     restart: always
     ports:
       - "80:80"
     depends_on:
-      - user-app
-      - questionbank-app
+      - apigateway
     networks:
       - peerprep-network
 

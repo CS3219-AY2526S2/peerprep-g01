@@ -8,8 +8,14 @@ export async function loginUser(email: string, password: string) {
   });
 
   if (!response.ok) {
-    const err = await response.json();
-    throw new Error(err.message || "login failed");
+    let message = "Login failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
   }
 
   return response.json();

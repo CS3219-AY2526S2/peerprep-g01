@@ -1,21 +1,15 @@
 require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 const userRoutes = require("./src/routes/userRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const questionHistoryRoutes = require("./src/routes/questionHistoryRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
-const cors = require("cors");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(
-  cors({
-    origin: process.env.FRONTEND_URL,
-    credentials: true,
-  }),
-);
-
+app.use(cors({ origin: process.env.FRONTEND_URL || "http://localhost", credentials: true }));
 app.use(express.json());
 
 app.use("/api/users", userRoutes);
