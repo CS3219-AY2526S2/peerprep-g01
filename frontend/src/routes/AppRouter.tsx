@@ -8,6 +8,8 @@ import SignUp from "../pages/SignUpPage";
 import Login from "../pages/LoginPage";
 import UserHomePage from "../pages/UserHomePage";
 import UserDirectoryPage from "../pages/UserDirectoryPage";
+import ManageAdminPage from "../pages/ManageAdminPage"
+import ManageQuestionPage from "../pages/ManageQuestionPage"
 
 function AppRouter() {
   return (
@@ -20,6 +22,10 @@ function AppRouter() {
         <Route path="/home" element={<UserHomePage />} />
 
         <Route path="/user-directory" element={<UserDirectoryPage />} />
+
+        <Route path="/manage-admin"element={<ManageAdminPage />} />
+
+        <Route path="/manage-question"element={<ManageQuestionPage />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>

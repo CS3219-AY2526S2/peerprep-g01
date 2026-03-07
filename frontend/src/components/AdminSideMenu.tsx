@@ -11,13 +11,15 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import { useNavigate } from "react-router-dom";
 
 function AdminSideMenu() {
+  const navigate = useNavigate();
   const navItems = [
-    { text: "Manage Admins", icon: <AdminPanelSettingsOutlinedIcon /> },
-    { text: "Question Bank", icon: <DescriptionOutlinedIcon /> },
-    { text: "User Directory", icon: <ManageAccountsIcon /> },
-    { text: "Active Rooms", icon: <MeetingRoomIcon /> },
+    { text: "Manage Admins", icon: <AdminPanelSettingsOutlinedIcon />, path: "/manage-admin"},
+    { text: "Question Bank", icon: <DescriptionOutlinedIcon />, path: "/manage-question"},
+    { text: "User Directory", icon: <ManageAccountsIcon />, path: "/user-directory" },
+    { text: "Active Rooms", icon: <MeetingRoomIcon />, path: "" },
   ];
 
   return (
@@ -37,7 +39,7 @@ function AdminSideMenu() {
       <List>
         {navItems.map((item) => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton>
+            <ListItemButton onClick={() => navigate(item.path)}>
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
