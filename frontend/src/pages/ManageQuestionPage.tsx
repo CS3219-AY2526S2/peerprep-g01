@@ -1,7 +1,8 @@
-import AdminSideMenu from "../components/AdminSideMenu";
 import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import AdminSideMenu from "../components/AdminSideMenu";
 
-function UserDirectoryPage() {
+function ManageQuestionPage() {
   return (
 
     // ROOT — flex row puts sidebar + content side by side
@@ -25,11 +26,11 @@ function UserDirectoryPage() {
           display: "flex",
           flexDirection: "column",
         }}>
-            {/*Top Card(Search) */}
+            {/*Top Card(button) */}
           <Box sx ={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-start",
+            justifyContent: "space-between",
             p: 2,
             borderBottom: "1px solid",
             borderColor: "grey.200",
@@ -40,10 +41,18 @@ function UserDirectoryPage() {
               sx={{
                 width: 300,
                 "& .MuiOutlinedInput-root": {
-                  borderRadius: 5,   // ← change this number, higher = more rounded
+                  borderRadius: 5,
                 }
               }}
             />
+            <Button
+                size="medium"
+                variant="contained"
+                startIcon={<AddIcon/>}
+                sx={{ bgcolor: "#1e293b", borderRadius: 2, fontSize: 10, textTransform: "none" }}
+            >
+                Add Question
+            </Button>
           </Box>
           {/*Table content */}
           <TableContainer sx={{flex: 1}}>
@@ -51,16 +60,15 @@ function UserDirectoryPage() {
                 {/*Header*/}
                 <TableHead>
                     <TableRow sx={{bgcolor: "grey.50"}}>
-                    <TableCell sx={{fontWeight: 500, width: 30, py: 1 }}>#</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 150, py: 1}}>User Name</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 220, py: 1}}>Email</TableCell>
+                    <TableCell sx={{fontWeight: 500, width: 30, py: 1 }}>ID</TableCell>
+                    <TableCell sx={{fontWeight: 500, width: 220, py: 1}}>Question Title</TableCell>
+                    <TableCell sx={{fontWeight: 500, width: 120, py: 1}}>Topic</TableCell>
+                    <TableCell sx={{fontWeight: 500, width: 120, py: 1}}>Difficulty</TableCell>
                     <TableCell sx={{fontWeight: 500, width: 120, py: 1}}>Status</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 160, py: 1}}>Joined Date</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 100, py: 1}}>Last Active</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 120, py: 1}}/>
+                    <TableCell sx={{fontWeight: 500, width: 220, py: 1}}/>
                     </TableRow>
                 </TableHead>
-                {/*Table Body (create hooks and other stuff in here*/}
+                {/*Table Body */}
                 <TableBody>
                     
                 </TableBody>
@@ -72,4 +80,4 @@ function UserDirectoryPage() {
   );
 }
 
-export default UserDirectoryPage;
+export default ManageQuestionPage;

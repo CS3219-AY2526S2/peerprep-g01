@@ -92,6 +92,7 @@ services:
   frontend:
     build:
       context: ./frontend
+      dockerfile: Dockerfile.dev
       args:
         - VITE_API_BASE_URL=http://localhost:3000
     environment:
@@ -100,6 +101,10 @@ services:
     restart: always
     ports:
       - "80:80"
+    volumes:
+      - ./frontend:/app           # Mounts local source to container
+      - /app/node_modules         # Prevents local node_modules from overwriting container's
+    command: pnpm dev --host      # Overrides Dockerfile CMD to run dev server
     depends_on:
       - apigateway
     networks:
