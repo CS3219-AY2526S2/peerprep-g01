@@ -1,73 +1,30 @@
-import AdminSideMenu from "../components/AdminSideMenu";
-import { Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField } from "@mui/material";
+import { Box } from "@mui/material";
+import AdminSideMenu from "../features/admin/AdminSideMenu";
+import AdminTable from "../features/admin/AdminTable";
+import AdminTableAddButton from "../components/RoundedFilledButton";
+import SearchBar from "../components/SearchBar";
+
+const tableFields = [
+  "#",
+  "UserName",
+  "Email",
+  "Status",
+  "JoinedDate",
+  "LastActive",
+  "QuestionsCompleted",
+];
 
 function UserDirectoryPage() {
   return (
-
-    // ROOT — flex row puts sidebar + content side by side
     <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
-
-      {/* SIDEBAR — your existing component */}
       <AdminSideMenu />
-
-      {/* MAIN CONTENT — flex:1 takes all remaining space */}
-      <Box sx={{ flex: 1, bgcolor: "grey.100", p: 3, display: "flex", justifyContent: "flex-end", alignContent: "center" }}>
-
-        {/* WHITE CARD */}
-        <Box sx={{
-          bgcolor: "white",
-          borderRadius: 3,
-          border: "1px solid",
-          borderColor: "grey.200",
-          width: "100%",
-          maxWidth: 1200,
-          height: "95vh",
-          display: "flex",
-          flexDirection: "column",
-        }}>
-            {/*Top Card(Search) */}
-          <Box sx ={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            p: 2,
-            borderBottom: "1px solid",
-            borderColor: "grey.200",
-          }}>
-            <TextField
-              placeholder="Search for user"
-              size="small"
-              sx={{
-                width: 300,
-                "& .MuiOutlinedInput-root": {
-                  borderRadius: 5,   // ← change this number, higher = more rounded
-                }
-              }}
-            />
-          </Box>
-          {/*Table content */}
-          <TableContainer sx={{flex: 1}}>
-            <Table>
-                {/*Header*/}
-                <TableHead>
-                    <TableRow sx={{bgcolor: "grey.50"}}>
-                    <TableCell sx={{fontWeight: 500, width: 30, py: 1 }}>#</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 150, py: 1}}>User Name</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 220, py: 1}}>Email</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 120, py: 1}}>Status</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 160, py: 1}}>Joined Date</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 100, py: 1}}>Last Active</TableCell>
-                    <TableCell sx={{fontWeight: 500, width: 120, py: 1}}/>
-                    </TableRow>
-                </TableHead>
-                {/*Table Body (create hooks and other stuff in here*/}
-                <TableBody>
-                    
-                </TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
-      </Box>
+      <AdminTable
+        tableButtons={[
+          <SearchBar />,
+          <AdminTableAddButton label={"Add User"} />,
+        ]}
+        tableFields={tableFields}
+      />
     </Box>
   );
 }
