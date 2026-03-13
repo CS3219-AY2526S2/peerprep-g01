@@ -10,29 +10,24 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-import type User from "../../types/user";
 
-const roleLabel: Record<string, string> = {
-  "1": "User",
-  "2": "Admin",
-  "3": "SuperAdmin",
-};
-
-interface AdminTableProps {
+interface AdminTableProps<T> {
   tableButtons?: React.ReactNode[];
   tableFields?: string[];
-  rows?: User[];
+  rows?: T[];
   isLoading?: boolean;
   error?: string | null;
+  renderRow: (item: T, index: number) => React.ReactNode;
 }
 
-function AdminTable({
+function AdminTable<T>({
   tableButtons = [],
   tableFields = [],
   rows = [],
   isLoading = false,
   error = null,
-}: AdminTableProps) {
+  renderRow,
+}: AdminTableProps<T>) {
   const renderBody = () => {
     if (isLoading) {
       return (
@@ -68,13 +63,8 @@ function AdminTable({
       );
     }
 
-    return rows.map((user) => (
-      <TableRow key={user.userId} hover>
-        <TableCell>{user.userId}</TableCell>
-        <TableCell>{user.userName}</TableCell>
-        <TableCell>{user.email}</TableCell>
-        <TableCell>{roleLabel[user.role] ?? user.role}</TableCell>
-      </TableRow>
+    return rows.map((item, index) => (
+      <React.Fragment key={index}>{renderRow(item, index)}</React.Fragment>
     ));
   };
 

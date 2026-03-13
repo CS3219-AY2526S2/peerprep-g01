@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, TableCell, TableRow } from "@mui/material";
 import AdminSideMenu from "../features/admin/AdminSideMenu";
 import AdminTable from "../features/admin/AdminTable";
 import SearchBar from "../components/SearchBar";
@@ -13,7 +13,8 @@ function ManageUserPage() {
     "JoinedDate",
     "QuestionsCompleted",
   ];
-  const { users, isLoading, error, loadUsers } = useUsers();
+
+  const { users, isLoading, error, loadUsers, cursorOffset } = useUsers();
 
   useEffect(() => {
     loadUsers();
@@ -28,6 +29,17 @@ function ManageUserPage() {
         rows={users}
         isLoading={isLoading}
         error={error}
+        renderRow={(user, index) => (
+          <TableRow key={user.userId} hover sx={{ width: "100%" }}>
+            <TableCell>{cursorOffset + index + 1}</TableCell>
+            <TableCell>{user.userName}</TableCell>
+            <TableCell>{user.email}</TableCell>
+            <TableCell>
+              {new Date(user.createdAt).toLocaleDateString()}
+            </TableCell>
+            <TableCell>(Coming Soon)*</TableCell>
+          </TableRow>
+        )}
       />
     </Box>
   );
