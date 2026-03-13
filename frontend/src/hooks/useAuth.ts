@@ -1,11 +1,13 @@
 import { useState } from "react";
 import useAuthStore from "../store/authStore";
 import { loginUser } from "../services/userService";
+import { useNavigate } from "react-router-dom";
 
 function useAuth() {
   const { setUser, clearUser } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   async function login(email: string, password: string) {
     setIsLoading(true);
@@ -14,6 +16,11 @@ function useAuth() {
       const { token, user } = await loginUser(email, password);
       localStorage.setItem("token", token);
       setUser(user);
+      if (user.role === "1") {
+        navigate("/home");
+      } else {
+        navigate("/admin/manage-user");
+      }
       return true;
     } catch (err) {
       if (err instanceof Error) {

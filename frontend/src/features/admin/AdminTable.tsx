@@ -6,15 +6,78 @@ import {
   TableRow,
   TableCell,
   TableBody,
+  CircularProgress,
+  Typography,
 } from "@mui/material";
 import React from "react";
+import type User from "../../types/user";
+
+const roleLabel: Record<string, string> = {
+  "1": "User",
+  "2": "Admin",
+  "3": "SuperAdmin",
+};
 
 interface AdminTableProps {
   tableButtons?: React.ReactNode[];
   tableFields?: string[];
+  rows?: User[];
+  isLoading?: boolean;
+  error?: string | null;
 }
 
-function AdminTable({ tableButtons = [], tableFields = [] }: AdminTableProps) {
+function AdminTable({
+  tableButtons = [],
+  tableFields = [],
+  rows = [],
+  isLoading = false,
+  error = null,
+}: AdminTableProps) {
+  const renderBody = () => {
+    if (isLoading) {
+      return (
+        <TableRow>
+          <TableCell colSpan={tableFields.length} align="center" sx={{ py: 6 }}>
+            <CircularProgress size={28} />
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (error) {
+      return (
+        <TableRow>
+          <TableCell colSpan={tableFields.length} align="center" sx={{ py: 6 }}>
+            <Typography variant="body2" color="error">
+              {`Error message: ${error}`}
+            </Typography>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    if (rows.length === 0) {
+      return (
+        <TableRow>
+          <TableCell colSpan={tableFields.length} align="center" sx={{ py: 6 }}>
+            <Typography variant="body2" color="textSecondary">
+              No available entries.
+            </Typography>
+          </TableCell>
+        </TableRow>
+      );
+    }
+
+    return rows.map((user) => (
+      <TableRow key={user.userId} hover>
+        <TableCell>{user.userId}</TableCell>
+        <TableCell>{user.userName}</TableCell>
+        <TableCell>{user.email}</TableCell>
+        <TableCell>{roleLabel[user.role] ?? user.role}</TableCell>
+      </TableRow>
+    ));
+  };
+
   return (
     <Box
       sx={{
@@ -70,7 +133,7 @@ function AdminTable({ tableButtons = [], tableFields = [] }: AdminTableProps) {
               </TableRow>
             </TableHead>
             {/*Table Body */}
-            <TableBody></TableBody>
+            <TableBody>{renderBody()}</TableBody>
           </Table>
         </TableContainer>
       </Box>

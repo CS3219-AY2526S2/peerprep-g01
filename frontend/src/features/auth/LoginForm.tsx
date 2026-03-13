@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { Typography, Stack, Box, TextField, Button } from "@mui/material";
 
@@ -7,12 +6,10 @@ function LoginForm() {
   const [email, setUserEmail] = useState("");
   const [password, setUserPassword] = useState("");
   const { login, isLoading } = useAuth();
-  const navigate = useNavigate();
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
-    const success = await login(email, password);
-    if (success) navigate("/home");
+    await login(email, password);
   }
 
   return (
