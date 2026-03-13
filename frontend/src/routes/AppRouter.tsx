@@ -9,7 +9,7 @@ import Login from "../pages/LoginPage";
 import UserHomePage from "../pages/UserHomePage";
 import UserDirectoryPage from "../pages/UserDirectoryPage";
 import ManageAdminPage from "../pages/ManageAdminPage";
-import ManageQuestionPage from "../pages/ManageQuestionPage";
+import ManageQuestionPage from "../pages/QuestionBankPage";
 
 function AppRouter() {
   return (
@@ -23,9 +23,9 @@ function AppRouter() {
 
         <Route path="/admin/user-directory" element={<UserDirectoryPage />} />
 
-        <Route path="/manage-admin" element={<ManageAdminPage />} />
+        <Route path="/admin/manage-admin" element={<ManageAdminPage />} />
 
-        <Route path="/manage-question" element={<ManageQuestionPage />} />
+        <Route path="/admin/manage-question" element={<ManageQuestionPage />} />
 
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
