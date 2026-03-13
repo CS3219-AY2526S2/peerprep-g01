@@ -5,6 +5,7 @@ import { fetchUsers } from "../services/userService";
 function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
   const [nextCursor, setNextCursor] = useState<string | null>(null);
+  const [cursorOffset, setCursorOffset] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -16,6 +17,7 @@ function useUsers() {
     try {
       const { data, pagination } = await fetchUsers(params);
       setUsers(data);
+      setCursorOffset(0);
       setNextCursor(pagination.nextCursor);
       setHasMore(pagination.hasMore);
     } catch (err) {
@@ -35,6 +37,7 @@ function useUsers() {
     setIsLoading(true);
     try {
       const { data, pagination } = await fetchUsers({ cursor: nextCursor });
+      setCursorOffset((prev) => prev + users.length);
       setUsers((prev) => [...prev, ...data]);
       setNextCursor(pagination.nextCursor);
       setHasMore(pagination.hasMore);
@@ -54,6 +57,7 @@ function useUsers() {
     isLoading,
     error,
     loadUsers,
+    cursorOffset,
     loadNextUsers,
     updateUser,
     deleteUser,
