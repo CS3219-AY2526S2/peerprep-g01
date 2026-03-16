@@ -19,7 +19,7 @@ function useAuth() {
       if (user.role === "1") {
         navigate("/home");
       } else {
-        navigate("/admin/manage-user");
+        navigate("/admin/manage-admin");
       }
       return true;
     } catch (err) {

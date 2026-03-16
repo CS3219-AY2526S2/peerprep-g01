@@ -27,22 +27,22 @@ function AdminSideMenu() {
     {
       text: "Manage Admins",
       icon: <AdminPanelSettingsOutlinedIcon />,
-      path: "/admin/manage-admins",
+      path: "/admin/manage-admin",
     },
     {
       text: "Question Bank",
       icon: <DescriptionOutlinedIcon />,
-      path: "/admin/question-bank",
+      path: "/admin/manage-question",
     },
     {
       text: "User Directory",
       icon: <ManageAccountsIcon />,
-      path: "/admin/user-directory",
+      path: "/admin/manage-user",
     },
     {
       text: "Active Rooms",
       icon: <MeetingRoomIcon />,
-      path: "/admin/active-rooms",
+      path: "/admin/manage-room",
     },
   ];
 
