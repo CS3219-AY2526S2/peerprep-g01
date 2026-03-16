@@ -92,4 +92,24 @@ async function deleteUser(userId: string) {
   return response.json();
 }
 
-export { loginUser, fetchUsers, deleteUser };
+async function searchUser(userId: string) {
+  const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+    method: "GET",
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    let message = "Search user failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export { loginUser, fetchUsers, deleteUser, searchUser };

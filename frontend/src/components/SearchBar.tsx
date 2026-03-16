@@ -1,34 +1,46 @@
 import { InputAdornment, TextField } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-function SearchBar() {
+interface MyInputProps {
+  submitHandler: (keyword: string) => void;
+}
+
+function SearchBar({ submitHandler }: MyInputProps) {
   return (
-    <TextField
-      variant="outlined"
-      placeholder="Search"
-      name="search"
-      type="text"
-      slotProps={{
-        input: {
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon fontSize="small" />
-            </InputAdornment>
-          ),
-        },
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        const form = e.target as HTMLFormElement;
+        submitHandler(form.search.value);
       }}
-      sx={{
-        "& .MuiOutlinedInput-root": {
-          borderRadius: 4,
-          height: 32,
-          width: 300,
-          fontSize: 13,
-        },
-        "& .MuiOutlinedInput-input": {
-          py: 0,
-        },
-      }}
-    ></TextField>
+    >
+      <TextField
+        variant="outlined"
+        placeholder="Search"
+        name="search"
+        type="text"
+        slotProps={{
+          input: {
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon fontSize="small" />
+              </InputAdornment>
+            ),
+          },
+        }}
+        sx={{
+          "& .MuiOutlinedInput-root": {
+            borderRadius: 4,
+            height: 32,
+            width: 300,
+            fontSize: 13,
+          },
+          "& .MuiOutlinedInput-input": {
+            py: 0,
+          },
+        }}
+      ></TextField>
+    </form>
   );
 }
 

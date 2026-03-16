@@ -39,6 +39,7 @@ function useUsers() {
   async function loadNextUsers() {
     if (!hasMore || !nextCursor) return;
     setIsLoading(true);
+    setError(null);
     try {
       const { data, pagination } = await fetchUsers({ cursor: nextCursor });
       setCursorOffset((prev) => prev + users.length);
@@ -47,6 +48,26 @@ function useUsers() {
       setHasMore(pagination.hasMore);
     } catch (err) {
       if (err instanceof Error) setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  async function searchUsers(keyword: string) {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const { data, pagination } = await fetchUsers({ search: keyword });
+      setUsers(data);
+      setCursorOffset(0);
+      setNextCursor(pagination.nextCursor);
+      setHasMore(pagination.hasMore);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        console.log("An unexpected error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -78,6 +99,7 @@ function useUsers() {
     loadNextUsers,
     deleteUser,
     deletingUserId,
+    searchUsers,
   };
 }
 

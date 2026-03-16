@@ -37,6 +37,7 @@ function ManageUserPage() {
     cursorOffset,
     deleteUser,
     deletingUserId,
+    searchUsers,
   } = useUsers();
 
   const [confirmTarget, setConfirmTarget] = useState<User | null>(null);
@@ -59,11 +60,15 @@ function ManageUserPage() {
     setConfirmTarget(null);
   }
 
+  async function handleSearchSubmit(keyword: string) {
+    await searchUsers(keyword);
+  }
+
   return (
     <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
       <AdminSideMenu />
       <AdminTable
-        tableButtons={[<SearchBar />]}
+        tableButtons={[<SearchBar submitHandler={handleSearchSubmit} />]}
         tableFields={tableFields}
         rows={users}
         isLoading={isLoading}
