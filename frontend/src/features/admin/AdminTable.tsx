@@ -32,7 +32,7 @@ function AdminTable<T>({
     if (isLoading) {
       return (
         <TableRow>
-          <TableCell colSpan={tableFields.length} align="center" sx={{ py: 6 }}>
+          <TableCell colSpan={tableFields.length} align="center">
             <CircularProgress size={28} />
           </TableCell>
         </TableRow>
@@ -42,7 +42,7 @@ function AdminTable<T>({
     if (error) {
       return (
         <TableRow>
-          <TableCell colSpan={tableFields.length} align="center" sx={{ py: 6 }}>
+          <TableCell colSpan={tableFields.length} align="center">
             <Typography variant="body2" color="error">
               {`Error message: ${error}`}
             </Typography>
@@ -54,7 +54,7 @@ function AdminTable<T>({
     if (rows.length === 0) {
       return (
         <TableRow>
-          <TableCell colSpan={tableFields.length} align="center" sx={{ py: 6 }}>
+          <TableCell colSpan={tableFields.length} align="center">
             <Typography variant="body2" color="textSecondary">
               No available entries.
             </Typography>
@@ -116,7 +116,7 @@ function AdminTable<T>({
             <TableHead>
               <TableRow sx={{ bgcolor: "grey.50" }}>
                 {tableFields.map((item, index) => (
-                  <TableCell key={index} sx={{ fontWeight: 500, py: 1 }}>
+                  <TableCell key={index} sx={{ fontWeight: 500, py: 1, px: 4 }}>
                     {item}
                   </TableCell>
                 ))}
