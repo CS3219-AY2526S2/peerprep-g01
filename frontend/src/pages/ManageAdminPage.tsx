@@ -16,7 +16,11 @@ function ManageAdminPage() {
     "Status",
   ];
 
-  const roles = { "1": "User", "2": "Admin", "3": "Super Admin" };
+  const roles: Record<string, string> = {
+    "1": "User",
+    "2": "Admin",
+    "3": "Super Admin",
+  };
 
   const { admins, isLoading, error, loadAdmins, page } = useAdmins();
 
