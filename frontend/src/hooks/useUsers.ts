@@ -1,6 +1,9 @@
 import { useState } from "react";
 import type User from "../types/user";
-import { fetchUsers } from "../services/userService";
+import {
+  fetchUsers,
+  deleteUser as deleteUserRequest,
+} from "../services/userService";
 
 function useUsers() {
   const [users, setUsers] = useState<User[]>([]);
@@ -9,6 +12,7 @@ function useUsers() {
   const [hasMore, setHasMore] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
   // fetch first page of users in database
   async function loadUsers(params = {}) {
@@ -48,9 +52,22 @@ function useUsers() {
     }
   }
 
-  async function updateUser() {}
-
-  async function deleteUser() {}
+  async function deleteUser(userId: string) {
+    setDeletingUserId(userId);
+    try {
+      await deleteUserRequest(userId);
+      // remove from local state immediately — no need to refetch
+      setUsers((prev) => prev.filter((u) => u.userId !== userId));
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        console.log("An unexpected error occurred");
+      }
+    } finally {
+      setDeletingUserId(null);
+    }
+  }
 
   return {
     users,
@@ -59,8 +76,8 @@ function useUsers() {
     loadUsers,
     cursorOffset,
     loadNextUsers,
-    updateUser,
     deleteUser,
+    deletingUserId,
   };
 }
 

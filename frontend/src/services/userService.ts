@@ -72,4 +72,24 @@ async function fetchUsers(params: fetchUserParams = {}) {
   return response.json();
 }
 
-export { loginUser, fetchUsers };
+async function deleteUser(userId: string) {
+  const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    let message = "Delete user failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export { loginUser, fetchUsers, deleteUser };
