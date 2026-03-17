@@ -28,12 +28,15 @@ function ManageAdminPage() {
     loadAdmins();
   }, []);
 
+  //todo
+  async function handleSearchSubmit() {}
+
   return (
     <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
       <AdminSideMenu />
       <AdminTable
         tableButtons={[
-          <SearchBar />,
+          <SearchBar submitHandler={handleSearchSubmit} />,
           <AdminTableAddButton label={"Add Admin"} />,
         ]}
         tableFields={tableFields}
