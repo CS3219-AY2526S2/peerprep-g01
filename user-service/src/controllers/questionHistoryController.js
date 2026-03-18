@@ -156,3 +156,26 @@ const deleteHistory = async (req, res) => {
 };
 
 module.exports = { getHistory, createHistory, deleteHistory };
+
+// DELETE /question_history/by-question/:questionId — internal service-to-service call
+// Deletes ALL history entries for a given questionId across ALL users
+const deleteHistoryByQuestion = async (req, res) => {
+    try {
+      const { questionId } = req.params;
+  
+      await db.query(
+        `DELETE FROM "question_history" WHERE "questionId" = $1`,
+        [questionId]
+      );
+  
+      return res.status(200).json({
+        success: true,
+        message: `Question history for questionId ${questionId} deleted successfully`,
+      });
+    } catch (err) {
+      console.error('DELETE /question_history/by-question error:', err);
+      return res.status(500).json({ success: false, message: 'Internal server error' });
+    }
+  };
+  
+  module.exports = { getHistory, createHistory, deleteHistory, deleteHistoryByQuestion };
