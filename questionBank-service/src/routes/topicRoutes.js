@@ -4,7 +4,8 @@ const router = express.Router();
 const topicController = require('../controllers/topicController');
 
 //topic table api
-router.get('/topics', topicController.getAllTopics);
-router.post('/topics', topicController.addTopic);
+router.get('/topic', topicController.getAllTopics);
+router.post('/topic', topicController.addTopic);
+router.delete('/topic/:id', topicController.deleteTopic);
 
 module.exports = router;

@@ -1,12 +1,14 @@
 require('dotenv').config();
 const express = require('express');
 const questionRoutes = require('./src/routes/questionRoutes');
+const topicRoutes = require('./src/routes/topicRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
 
+app.use('/api/questions', topicRoutes);
 app.use('/api/questions', questionRoutes);
 
 app.get('/health', (req, res) => {

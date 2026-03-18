@@ -1,15 +1,15 @@
 const db = require('../config/db');
 
 /**
- * GET /api/questions/topics
+ * GET /api/questions/topic
  * 
  * Returns all available topic names from the "topic" table.
  */
 exports.getAllTopics = async (req, res) => {
   try {
-    const [rows] = await db.execute('SELECT * FROM topic');
+    const result = await db.query('SELECT "topicId", "topicName" FROM "topic" ORDER BY "topicId" ASC');
     res.status(200).json({
-      data: rows
+      data: result.rows
     });
   } catch (error) {
     console.error('Error fetching topics:', error);
@@ -18,7 +18,7 @@ exports.getAllTopics = async (req, res) => {
 };
 
 /**
- * POST /api/questions/topics
+ * POST /api/questions/topic
  * 
  * Body: { name }
  *
@@ -28,15 +28,22 @@ exports.getAllTopics = async (req, res) => {
 exports.addTopic = async (req, res) => {
   const { topicName } = req.body;
 
+  if (!topicName || typeof topicName !== 'string' || !topicName.trim()) {
+    return res.status(400).json({ error: 'topicName is required' });
+  }
+
   try {
-    const [result] = await db.execute('INSERT INTO topic (name) VALUES (?)', [topicName]);
+    const result = await db.query(
+      'INSERT INTO "topic" ("topicName") VALUES ($1) RETURNING "topicId", "topicName"',
+      [topicName.trim()]
+    );
+
     res.status(201).json({
       message: 'Topic added successfully',
-      id: result.insertId,
-      name: topicName
+      data: result.rows[0]
     });
   } catch (error) {
-    if (error.code === 'ER_DUP_ENTRY') {
+    if (error.code === '23505') {
       return res.status(400).json({ 
         error: 'Topic name already exists' 
       });
@@ -48,7 +55,7 @@ exports.addTopic = async (req, res) => {
 };
 
 /**
- * DELETE /api/questions/topics/:id (restricted)
+ * DELETE /api/questions/topic/:id (restricted)
  * 
  * Deletes a topic from the "topic" table based on its ID.
  * Ensure that there are no questions associated with the topic before deletion to maintain data integrity.
@@ -56,16 +63,31 @@ exports.addTopic = async (req, res) => {
 exports.deleteTopic = async (req, res) => {
   const { id } = req.params;
 
+  if (!id || Number.isNaN(Number(id))) {
+    return res.status(400).json({ error: 'Valid topic id is required' });
+  }
+
   try {
     // Check if there are questions associated with the topic
-    const [questions] = await db.execute('SELECT COUNT(*) AS count FROM question WHERE topic_id = ?', [id]);
+    const questions = await db.query(
+      'SELECT COUNT(*)::int AS count FROM "question_bank" WHERE "topicId" = $1',
+      [id]
+    );
 
-    if (questions[0].count > 0) {
+    if (questions.rows[0].count > 0) {
       return res.status(400).json({ error: 'Error deleting topic: Please delete questions associated with this topic first' });
     }
 
     // If no questions are associated, delete the topic
-    await db.execute('DELETE FROM topic WHERE id = ?', [id]);
+    const deleted = await db.query(
+      'DELETE FROM "topic" WHERE "topicId" = $1 RETURNING "topicId"',
+      [id]
+    );
+
+    if (deleted.rowCount === 0) {
+      return res.status(404).json({ error: 'Topic not found' });
+    }
+
     res.status(200).json({
       message: 'Topic deleted successfully' 
     });
@@ -75,7 +97,3 @@ exports.deleteTopic = async (req, res) => {
   }
 };
 
-module.exports = {
-  getAllTopics,
-  addTopic
-};
