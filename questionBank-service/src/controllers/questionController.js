@@ -248,13 +248,16 @@ exports.deleteQuestion = async (req, res) => {
 
     // Cascade delete to user-service question_history
     try {
-      const axios = require('axios');
+      const axios = require("axios");
       await axios.delete(
-        `${process.env.USER_SERVICE_URL}/api/question_history/by-question/${questionId}`
+        `${process.env.USER_SERVICE_URL}/api/question_history/by-question/${questionId}`,
       );
     } catch (cascadeErr) {
       // Log but don't fail the request — question is already deleted
-      console.warn('Warning: Could not cascade delete question history:', cascadeErr.message);
+      console.warn(
+        "Warning: Could not cascade delete question history:",
+        cascadeErr.message,
+      );
     }
 
     return res.status(200).json({
