@@ -37,6 +37,26 @@ function authMiddleware(req, res, next) {
   }
 }
 
+function roleMiddleware(allowedRoles) {
+  return (req, res, next) => {
+    if (allowedRoles.includes(req.user.role)) {
+      next();
+    } else {
+      res
+        .status(403)
+        .json({ error: "Access denied. Insufficient permissions." });
+    }
+  };
+}
+
+function methodRoleMiddleware(req, res, next) {
+  const writesMethods = ["POST", "PUT", "DELETE"];
+  if (writesMethods.includes(req.method)) {
+    return roleMiddleware(["2", "3"])(req, res, next);
+  }
+  next();
+}
+
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "api-gateway" });
 });
@@ -53,6 +73,7 @@ app.use(
 app.use(
   "/api/users",
   authMiddleware,
+  roleMiddleware(["2", "3"]),
   createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
@@ -63,6 +84,7 @@ app.use(
 app.use(
   "/api/question_history",
   authMiddleware,
+  roleMiddleware(["2", "3"]),
   createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
@@ -73,6 +95,7 @@ app.use(
 app.use(
   "/api/admins",
   authMiddleware,
+  roleMiddleware(["3"]),
   createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
@@ -83,6 +106,7 @@ app.use(
 app.use(
   "/api/questions",
   authMiddleware,
+  methodRoleMiddleware,
   createProxyMiddleware({
     target: QUESTION_SERVICE_URL,
     changeOrigin: true,
