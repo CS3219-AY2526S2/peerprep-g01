@@ -15,6 +15,7 @@ function useAuth() {
     try {
       const { token, user } = await loginUser(email, password);
       localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
       setUser(user);
       if (user.role === "1") {
         navigate("/home");
