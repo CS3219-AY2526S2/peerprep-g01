@@ -7,17 +7,17 @@ function UserHomePage() {
   const { user } = useAuthStore();
 
   // Check if the user has admin privileges
-  const isAdmin = user?.role === '2' || '3';
+  const isAdmin = user?.role === "2" || "3";
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h1">This is supposedly home</Typography>
-      
+
       {isAdmin && (
-        <Button 
-          variant="contained" 
-          color="primary" 
-          onClick={() => navigate("/user-directory")}
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => navigate("/admin/manage-user")}
           sx={{ mt: 2 }}
         >
           Manage Admins (User Directory)
