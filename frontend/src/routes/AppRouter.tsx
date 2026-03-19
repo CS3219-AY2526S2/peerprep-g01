@@ -13,8 +13,15 @@ import ManageAdminPage from "../pages/ManageAdminPage";
 import ManageQuestionPage from "../pages/ManageQuestionPage";
 import ManageRoomPage from "../pages/ManageRoomPage";
 
-// todo: add auth check
+function UserLayout() {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/login" replace />;
+  return <Outlet />;
+}
+
 function AdminLayout() {
+  const token = localStorage.getItem("token");
+  if (!token) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
@@ -24,7 +31,10 @@ function AppRouter() {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/home" element={<UserHomePage />} />
+
+        <Route path="/" element={<UserLayout />}>
+          <Route path="home" element={<UserHomePage />} />
+        </Route>
 
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="manage-user" element={<ManageUserPage />} />
