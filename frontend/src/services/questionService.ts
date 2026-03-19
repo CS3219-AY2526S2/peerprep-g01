@@ -55,4 +55,23 @@ async function fetchQuestions(params: fetchQuestionParams = {}) {
   return response.json();
 }
 
-export { fetchQuestions };
+async function deleteQuestion(questionId: string) {
+  const response = await fetch(`${BASE_URL}/api/questions/${questionId}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+
+  if (!response.ok) {
+    let message = `Delete question (${questionId}) request failed`;
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+  return response.json();
+}
+
+export { fetchQuestions, deleteQuestion };
