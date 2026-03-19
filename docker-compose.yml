@@ -88,6 +88,26 @@ services:
       - questionbank-app
     networks:
       - peerprep-network
+
+  # ---------- Matching Service ----
+  matching-service:
+    build: ./matching-service
+    ports:
+    - "3003:3003"
+    environment:
+    - PORT=3003
+    - REDIS_URL=redis://redis:6379
+    - QUESTION_SERVICE_URL=http://question-service:3002
+    - MATCH_TIMEOUT=30000
+    depends_on:
+    - redis
+    
+  redis:
+  image: redis:7-alpine
+  ports:
+  - "6379:6379"
+  volumes:
+  - redis-data:/data
        
   # ---------- Frontend ----------
   frontend:
