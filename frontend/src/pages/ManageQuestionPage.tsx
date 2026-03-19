@@ -1,10 +1,23 @@
-import { Box, TableCell, TableRow } from "@mui/material";
+import {
+  Box,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
+  IconButton,
+  TableCell,
+  TableRow,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import AdminSideMenu from "../features/admin/AdminSideMenu";
 import AdminTable from "../features/admin/AdminTable";
 import SearchBar from "../components/SearchBar";
 import AdminTableAddButton from "../components/RoundedFilledButton";
 import useQuestion from "../hooks/useQuestion";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import type Question from "../types/question";
 
 function ManageQuestionPage() {
   const tableFields = [
@@ -13,8 +26,10 @@ function ManageQuestionPage() {
     "Topic",
     "Difficulty",
     "CreatedAt",
+    "",
   ];
 
+  // remove hard code in the future for topics
   const topics: Record<string, string> = {
     "1": "Arrays",
     "2": "Strings",
@@ -28,7 +43,17 @@ function ManageQuestionPage() {
     "10": "Binary Search",
   };
 
-  const { questions, isLoading, error, loadQuestions, page } = useQuestion();
+  const {
+    questions,
+    isLoading,
+    error,
+    loadQuestions,
+    deleteQuestion,
+    deletingQuestionId,
+    page,
+  } = useQuestion();
+
+  const [confirmTarget, setConfirmTarget] = useState<Question | null>(null);
 
   useEffect(() => {
     loadQuestions();
@@ -36,6 +61,20 @@ function ManageQuestionPage() {
 
   // todo
   async function handleSearchSubmit() {}
+
+  function handleDeleteClick(question: Question) {
+    setConfirmTarget(question);
+  }
+
+  async function handleConfirmDelete() {
+    if (!confirmTarget) return;
+    await deleteQuestion(confirmTarget.questionId);
+    setConfirmTarget(null);
+  }
+
+  function handleCancelDelete() {
+    setConfirmTarget(null);
+  }
 
   return (
     <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
@@ -58,9 +97,40 @@ function ManageQuestionPage() {
             <TableCell>
               {new Date(question.createdAt).toLocaleDateString()}
             </TableCell>
+            <TableCell>
+              <IconButton
+                size="small"
+                onClick={() => handleDeleteClick(question)}
+                aria-label={`Delete ${question.questionId}`}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </TableCell>
           </TableRow>
         )}
       />
+
+      <Dialog open={!!confirmTarget} onClose={handleCancelDelete}>
+        <DialogTitle>Delete Question</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete{" "}
+            <strong>{confirmTarget?.questionName}</strong> (
+            {confirmTarget?.questionId})
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCancelDelete}>Cancel</Button>
+          <Button
+            onClick={handleConfirmDelete}
+            color="error"
+            variant="contained"
+            disabled={!!deletingQuestionId}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 }
