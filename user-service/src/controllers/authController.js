@@ -125,3 +125,9 @@ exports.login = async (req, res) => {
 exports.logout = async (_req, res) => {
     return res.status(200).json({ message: 'Logged out successfully.' });
 };
+
+module.exports = {
+    register,
+    login,
+    logout
+};
