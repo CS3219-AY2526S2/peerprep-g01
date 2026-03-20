@@ -19,7 +19,6 @@ async function findMatch(userId, topic, difficulty){
         if (entry.userId !== userId) {
             await redis.lrem(key, 1, raw);
             await removeFromQueue(userId, topic, difficulty);
-
             const sessionId = uuidv4();
             return {matched: true, sessionId, matchedUserId: entry.userId};
         }
