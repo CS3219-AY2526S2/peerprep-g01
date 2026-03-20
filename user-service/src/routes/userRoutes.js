@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const authMiddleware = require('../middleware/authMiddleware');
 const adminOnlyMiddleware = require('../middleware/roleMiddleware');
-const { getUsers, getUserById, deleteUser } = require('../controllers/userController');
+const { getUsers, getUserById, deleteUser, getUserQuestionHistoryId } = require('../controllers/userController');
 
 // All user routes require authentication
 router.use(authMiddleware);
@@ -15,5 +15,8 @@ router.get('/:id', getUserById);
 
 // DELETE /api/users/:id — admin only
 router.delete('/:id', adminOnlyMiddleware, deleteUser);
+
+// GET /api/users/question_history/:userId — get IDs of user's question history
+router.get('/question_history/:userId', getUserQuestionHistoryId);
 
 module.exports = router;
