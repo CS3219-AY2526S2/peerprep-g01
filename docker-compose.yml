@@ -86,6 +86,35 @@ services:
     depends_on:
       - user-app
       - questionbank-app
+      - matching-app
+    networks:
+      - peerprep-network
+
+  # ---------- Matching Service ----
+  matching-app:
+    build: ./matching-service
+    container_name: peerprep_matching_app
+    restart: always
+    environment:
+      PORT: 3003
+      REDIS_URL: redis://matching-redis:6379
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./matching-service:/app
+      - /app/node_modules
+    depends_on:
+      - matching-redis
+    networks:
+      - peerprep-network
+
+  matching-redis:
+    image: redis:7-alpine
+    container_name: peerprep_matching_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
     networks:
       - peerprep-network
        
@@ -134,3 +163,4 @@ networks:
 volumes:
   user_pgdata:
   qb_pgdata:
+  redis-data:
