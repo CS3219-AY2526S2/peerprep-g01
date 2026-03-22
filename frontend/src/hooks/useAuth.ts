@@ -13,10 +13,8 @@ function useAuth() {
     setIsLoading(true);
     setError(null);
     try {
-      const { token, user } = await loginUser(email, password);
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
-      setUser(user);
+      const { user, token } = await loginUser(email, password);
+      setUser(user, token);
       if (user.role === "1") {
         navigate("/home");
       } else {
@@ -36,7 +34,6 @@ function useAuth() {
   }
 
   function logout() {
-    localStorage.removeItem("token");
     clearUser();
   }
 

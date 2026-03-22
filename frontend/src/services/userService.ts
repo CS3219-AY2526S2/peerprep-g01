@@ -1,4 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+import apiFetch from "../utils/apiFetch";
 
 interface fetchUserParams {
   limit?: number;
@@ -7,13 +8,6 @@ interface fetchUserParams {
   order?: "asc" | "desc";
   search?: string | null;
   role?: string;
-}
-
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  };
 }
 
 async function loginUser(email: string, password: string) {
@@ -55,9 +49,7 @@ async function fetchUsers(params: fetchUserParams = {}) {
   if (cursor) query.set("cursor", cursor);
   if (search) query.set("search", search);
 
-  const response = await fetch(`${BASE_URL}/api/users?${query.toString()}`, {
-    headers: authHeaders(),
-  });
+  const response = await apiFetch(`${BASE_URL}/api/users?${query.toString()}`);
   if (!response.ok) {
     let message = "Fetch users failed";
     try {
@@ -73,9 +65,8 @@ async function fetchUsers(params: fetchUserParams = {}) {
 }
 
 async function deleteUser(userId: string) {
-  const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+  const response = await apiFetch(`${BASE_URL}/api/users/${userId}`, {
     method: "DELETE",
-    headers: authHeaders(),
   });
 
   if (!response.ok) {
@@ -93,9 +84,8 @@ async function deleteUser(userId: string) {
 }
 
 async function searchUser(userId: string) {
-  const response = await fetch(`${BASE_URL}/api/users/${userId}`, {
+  const response = await apiFetch(`${BASE_URL}/api/users/${userId}`, {
     method: "GET",
-    headers: authHeaders(),
   });
 
   if (!response.ok) {

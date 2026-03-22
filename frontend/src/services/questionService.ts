@@ -1,3 +1,6 @@
+import type Question from "../types/question";
+import apiFetch from "../utils/apiFetch";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 interface fetchQuestionParams {
@@ -7,13 +10,6 @@ interface fetchQuestionParams {
   topicId?: string | null;
   sortBy?: "createdAt" | "questionName" | "difficulty";
   sortOrder?: "desc" | "asc";
-}
-
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  };
 }
 
 async function fetchQuestions(params: fetchQuestionParams = {}) {
@@ -34,11 +30,8 @@ async function fetchQuestions(params: fetchQuestionParams = {}) {
   if (difficulty) query.set("difficulty", difficulty);
   if (topicId) query.set("topicId", topicId);
 
-  const response = await fetch(
+  const response = await apiFetch(
     `${BASE_URL}/api/questions?${query.toString()}`,
-    {
-      headers: authHeaders(),
-    },
   );
 
   if (!response.ok) {
@@ -56,9 +49,8 @@ async function fetchQuestions(params: fetchQuestionParams = {}) {
 }
 
 async function deleteQuestion(questionId: string) {
-  const response = await fetch(`${BASE_URL}/api/questions/${questionId}`, {
+  const response = await apiFetch(`${BASE_URL}/api/questions/${questionId}`, {
     method: "DELETE",
-    headers: authHeaders(),
   });
 
   if (!response.ok) {
@@ -74,4 +66,47 @@ async function deleteQuestion(questionId: string) {
   return response.json();
 }
 
-export { fetchQuestions, deleteQuestion };
+async function addQuestion(
+  question: Omit<Question, "questionId" | "createdAt" | "modifiedAt">,
+) {
+  const response = await apiFetch(`${BASE_URL}/api/questions/add/`, {
+    method: "POST",
+    body: JSON.stringify(question),
+  });
+
+  if (!response.ok) {
+    let message = `Add question (${question.questionName}) request failed`;
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+  return response.json();
+}
+
+async function updateQuestion(question: Question) {
+  const response = await apiFetch(
+    `${BASE_URL}/api/questions/${question.questionId}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(question),
+    },
+  );
+
+  if (!response.ok) {
+    let message = `Update question (${question.questionId}) request failed`;
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+  return response.json();
+}
+
+export { fetchQuestions, deleteQuestion, updateQuestion, addQuestion };
