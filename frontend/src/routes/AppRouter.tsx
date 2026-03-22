@@ -12,15 +12,16 @@ import ManageUserPage from "../pages/ManageUserPage";
 import ManageAdminPage from "../pages/ManageAdminPage";
 import ManageQuestionPage from "../pages/ManageQuestionPage";
 import ManageRoomPage from "../pages/ManageRoomPage";
+import useAuthStore from "../store/authStore";
 
 function UserLayout() {
-  const token = localStorage.getItem("token");
+  const token = useAuthStore.getState().token;
   if (!token) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
 function AdminLayout() {
-  const token = localStorage.getItem("token");
+  const token = useAuthStore.getState().token;
   if (!token) return <Navigate to="/login" replace />;
   return <Outlet />;
 }

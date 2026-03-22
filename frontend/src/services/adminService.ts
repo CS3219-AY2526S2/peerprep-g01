@@ -1,11 +1,5 @@
 const BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
-function authHeaders() {
-  return {
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  };
-}
+import apiFetch from "../utils/apiFetch";
 
 async function fetchAdmins(page: number = 1, pageSize: number = 10) {
   const params = new URLSearchParams({
@@ -13,9 +7,7 @@ async function fetchAdmins(page: number = 1, pageSize: number = 10) {
     pageSize: String(pageSize),
   });
 
-  const response = await fetch(`${BASE_URL}/api/admins?${params}`, {
-    headers: authHeaders(),
-  });
+  const response = await apiFetch(`${BASE_URL}/api/admins?${params}`);
   if (!response.ok) {
     let message = "Fetch admins failed";
     try {
