@@ -127,4 +127,34 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUserById, deleteUser };
+/**
+ * GET /api/users/question_history/:userId
+ * 
+ * Returns the question history IDs for a specific user.
+ */
+const getUserQuestionHistoryId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const result = await db.query(
+      `SELECT "questionId"
+       FROM "question_history"
+       WHERE "userId" = $1
+       ORDER BY "sessionEndAt" DESC`,
+      [userId]
+    );
+    return res.status(200).json({
+      success: true,
+      data: result.rows.map(row => row.questionId).join(','),
+    });
+  } catch (err) {
+    console.error('GET /api/users/question_history/:userId error:', err);
+    return res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+};
+
+module.exports = { 
+  getUsers, 
+  getUserById, 
+  deleteUser,
+  getUserQuestionHistoryId
+};
