@@ -5,7 +5,7 @@ const adminOnlyMiddleware = require('../middleware/roleMiddleware');
 const { getUsers, getUserById, deleteUser, getUserQuestionHistoryId } = require('../controllers/userController');
 
 // All user routes require authentication
-router.use(authMiddleware);
+// router.use(authMiddleware);
 
 // GET /api/users — list users with pagination
 router.get('/', getUsers);

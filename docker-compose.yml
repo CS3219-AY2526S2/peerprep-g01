@@ -98,6 +98,8 @@ services:
     environment:
       PORT: 3003
       REDIS_URL: redis://matching-redis:6379
+      USER_SERVICE_URL: http://user-app:3001
+      QUESTION_SERVICE_URL: http://questionbank-app:3002
     ports:
       - "3003:3003"
     volumes:
