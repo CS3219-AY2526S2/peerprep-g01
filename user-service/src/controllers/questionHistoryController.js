@@ -155,8 +155,6 @@ const deleteHistory = async (req, res) => {
   }
 };
 
-module.exports = { getHistory, createHistory, deleteHistory };
-
 // DELETE /question_history/by-question/:questionId — internal service-to-service call
 // Deletes ALL history entries for a given questionId across ALL users
 const deleteHistoryByQuestion = async (req, res) => {
@@ -178,4 +176,9 @@ const deleteHistoryByQuestion = async (req, res) => {
     }
   };
   
-  module.exports = { getHistory, createHistory, deleteHistory, deleteHistoryByQuestion };
+module.exports = { 
+  getHistory, 
+  createHistory, 
+  deleteHistory, 
+  deleteHistoryByQuestion 
+};
