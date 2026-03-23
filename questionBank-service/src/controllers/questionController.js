@@ -255,3 +255,75 @@ exports.deleteQuestion = async (req, res) => {
     return res.status(500).json({ error: 'Internal Server Error' });
   }
 };
+
+exports.selectQuestion = async (req, res) => {
+  const { topicId, difficulty, exclude = [] } = req.body;
+
+  if (!topicId || !difficulty) {
+    return res.status(400).json({ error: 'topicId and difficulty are required' });
+  }
+
+  try {
+    let result;
+    let usedFallback = false;
+
+    // Try to find a question not in the exclude list
+    if (exclude.length > 0) {
+      const excludePlaceholders = exclude.map((_, i) => `$${i + 3}`).join(', ');
+      result = await db.query(
+        `SELECT q.*, t."topicName"
+         FROM "question_bank" q
+         JOIN "topic" t ON t."topicId" = q."topicId"
+         WHERE q."topicId" = $1
+           AND q."difficulty" = $2
+           AND q."questionId"::text NOT IN (${excludePlaceholders})
+         ORDER BY RANDOM()
+         LIMIT 1`,
+        [topicId, difficulty, ...exclude]
+      );
+
+      // Fallback: no questions left after exclusion
+      if (result.rows.length === 0) {
+        usedFallback = true;
+        result = await db.query(
+          `SELECT q.*, t."topicName"
+           FROM "question_bank" q
+           JOIN "topic" t ON t."topicId" = q."topicId"
+           WHERE q."topicId" = $1
+             AND q."difficulty" = $2
+           ORDER BY RANDOM()
+           LIMIT 1`,
+          [topicId, difficulty]
+        );
+      }
+    } else {
+      // No exclude list, just get a random question
+      result = await db.query(
+        `SELECT q.*, t."topicName"
+         FROM "question_bank" q
+         JOIN "topic" t ON t."topicId" = q."topicId"
+         WHERE q."topicId" = $1
+           AND q."difficulty" = $2
+         ORDER BY RANDOM()
+         LIMIT 1`,
+        [topicId, difficulty]
+      );
+    }
+
+    // topic + difficulty combo doesn't exist
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'No questions found for the given topic and difficulty',
+      });
+    }
+
+    return res.status(200).json({
+      status: 'success',
+      fallback: usedFallback,
+      data: result.rows[0],
+    });
+  } catch (err) {
+    console.error('Error selecting question:', err);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
