@@ -26,7 +26,7 @@ async function requestMatch(req, res) {
 
     const poll = async() => {
         if (cancelled) return;
-        if ( Date.now() > deadline) {
+        if ( Date.now() > deadline ) {
             await removeFromQueue(userId, topic, difficulty);
             await setMatchStatus(userId, { status: 'timeout', message: 'No match found'})
             return res.status(408).json({ status: 'timeout', message: 'No match found'})
@@ -82,6 +82,17 @@ async function checkMatchStatus(req, res) {
         return res.status(404).json({error: 'No match request found for this user'})
     }
     res.status(200).json(status)
+}
+
+async function matchMetaData(userA, userB, sessionId) {
+    /* get question history from user A
+    get question history from user B */
+    
+    // union both users question history
+    // send the question list to question history api
+    // get back the question metadata
+    // route with session ID
+    // send it to collab service
 }
 
 module.exports = { requestMatch, cancelMatch, checkMatchStatus }
