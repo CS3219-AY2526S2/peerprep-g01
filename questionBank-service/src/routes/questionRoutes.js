@@ -5,6 +5,7 @@ const questionController = require('../controllers/questionController');
 // Static routes first
 router.get('/', questionController.getAllQuestions);
 router.post('/add', questionController.addQuestion);
+router.post('/select', questionController.selectQuestion); 
 
 // Dynamic/parameter routes last
 router.get('/:questionId', questionController.getQuestionById);
