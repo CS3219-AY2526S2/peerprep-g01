@@ -120,9 +120,7 @@ exports.addQuestion = async (req, res) => {
     privateTestCase,
   } = req.body;
 
-  console.log("received headers:", req.headers["x-user-id"]);
-  const createdBy =
-    req.headers["x-user-id"] || "a0000000-0000-0000-0000-000000000001";
+  const createdBy = req.user?.userId || "a0000000-0000-0000-0000-000000000001";
 
   try {
     const query = `
@@ -250,13 +248,16 @@ exports.deleteQuestion = async (req, res) => {
 
     // Cascade delete to user-service question_history
     try {
-      const axios = require('axios');
+      const axios = require("axios");
       await axios.delete(
-        `${process.env.USER_SERVICE_URL}/api/question_history/by-question/${questionId}`
+        `${process.env.USER_SERVICE_URL}/api/question_history/by-question/${questionId}`,
       );
     } catch (cascadeErr) {
       // Log but don't fail the request — question is already deleted
-      console.warn('Warning: Could not cascade delete question history:', cascadeErr.message);
+      console.warn(
+        "Warning: Could not cascade delete question history:",
+        cascadeErr.message,
+      );
     }
 
     return res.status(200).json({
@@ -273,7 +274,9 @@ exports.selectQuestion = async (req, res) => {
   const { topicId, difficulty, exclude = [] } = req.body;
 
   if (!topicId || !difficulty) {
-    return res.status(400).json({ error: 'topicId and difficulty are required' });
+    return res
+      .status(400)
+      .json({ error: "topicId and difficulty are required" });
   }
 
   try {
@@ -282,7 +285,7 @@ exports.selectQuestion = async (req, res) => {
 
     // Try to find a question not in the exclude list
     if (exclude.length > 0) {
-      const excludePlaceholders = exclude.map((_, i) => `$${i + 3}`).join(', ');
+      const excludePlaceholders = exclude.map((_, i) => `$${i + 3}`).join(", ");
       result = await db.query(
         `SELECT q.*, t."topicName"
          FROM "question_bank" q
@@ -292,7 +295,7 @@ exports.selectQuestion = async (req, res) => {
            AND q."questionId"::text NOT IN (${excludePlaceholders})
          ORDER BY RANDOM()
          LIMIT 1`,
-        [topicId, difficulty, ...exclude]
+        [topicId, difficulty, ...exclude],
       );
 
       // Fallback: no questions left after exclusion
@@ -306,7 +309,7 @@ exports.selectQuestion = async (req, res) => {
              AND q."difficulty" = $2
            ORDER BY RANDOM()
            LIMIT 1`,
-          [topicId, difficulty]
+          [topicId, difficulty],
         );
       }
     } else {
@@ -319,24 +322,24 @@ exports.selectQuestion = async (req, res) => {
            AND q."difficulty" = $2
          ORDER BY RANDOM()
          LIMIT 1`,
-        [topicId, difficulty]
+        [topicId, difficulty],
       );
     }
 
     // topic + difficulty combo doesn't exist
     if (result.rows.length === 0) {
       return res.status(404).json({
-        error: 'No questions found for the given topic and difficulty',
+        error: "No questions found for the given topic and difficulty",
       });
     }
 
     return res.status(200).json({
-      status: 'success',
+      status: "success",
       fallback: usedFallback,
       data: result.rows[0],
     });
   } catch (err) {
-    console.error('Error selecting question:', err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    console.error("Error selecting question:", err);
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };

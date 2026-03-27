@@ -111,15 +111,6 @@ app.use(
     target: QUESTION_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/questions/" },
-    on: {
-      proxyReq: (proxyReq, req) => {
-        if (req.user) {
-          proxyReq.setHeader("x-user-id", req.user.userId);
-          proxyReq.setHeader("x-user-role", req.user.role);
-          console.log("forwarding user:", req.user);
-        }
-      },
-    },
   }),
 );
 
