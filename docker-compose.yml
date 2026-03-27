@@ -80,6 +80,7 @@ services:
       FRONTEND_URL: http://localhost
       USER_SERVICE_URL: http://user-app:3001
       QUESTION_SERVICE_URL: http://questionbank-app:3002
+      COLLAB_SERVICE_URL: http://collab-app:3004
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
     ports:
       - "3000:3000"
