@@ -5,7 +5,7 @@ import tableTheme from "./theme";
 function App() {
   return (
     <ThemeProvider theme={tableTheme}>
-      <AppRouter />;
+      <AppRouter />
     </ThemeProvider>
   );
 }

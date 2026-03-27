@@ -77,7 +77,6 @@ function useUsers() {
     setDeletingUserId(userId);
     try {
       await deleteUserRequest(userId);
-      // remove from local state immediately — no need to refetch
       setUsers((prev) => prev.filter((u) => u.userId !== userId));
     } catch (err) {
       if (err instanceof Error) {
