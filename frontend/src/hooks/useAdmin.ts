@@ -21,11 +21,8 @@ function useAdmins() {
       setPage(pagination.page);
       setTotalPages(pagination.totalPages);
     } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        console.log("An unexpected error occurred");
-      }
+      if (err instanceof Error) setError(err.message);
+      else console.log("An unexpected error occurred");
     } finally {
       setIsLoading(false);
     }
