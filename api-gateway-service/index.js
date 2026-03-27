@@ -16,6 +16,7 @@ app.use(
 
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL;
+const COLLAB_SERVICE_URL = process.env.COLLAB_SERVICE_URL;
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -111,6 +112,17 @@ app.use(
     target: QUESTION_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/questions/" },
+  }),
+);
+
+app.use(
+  "/api/collab",
+  authMiddleware,
+  roleMiddleware(["2", "3"]),
+  createProxyMiddleware({
+    target: COLLAB_SERVICE_URL,
+    changeOrigin: true,
+    pathRewrite: { "^/": "/api/collab/" },
   }),
 );
 
