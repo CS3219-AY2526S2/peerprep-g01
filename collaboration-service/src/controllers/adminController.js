@@ -1,5 +1,5 @@
 const db = require('../config/db');
-const { getAllRooms } = require('../websocket/roomManager');
+const { getRoom, getConnectedCount } = require('../websocket/roomManager');
 
 /**
  * GET /api/collab/rooms
@@ -12,17 +12,10 @@ const listActiveRooms = async (req, res) => {
       ['active']
     );
 
-    const rooms = getAllRooms();
-    const sessions = result.rows.map((session) => {
-      const room = rooms.get(session.roomId);
-      let connectedUsers = 0;
-      if (room) {
-        for (const u of room.users.values()) {
-          if (u.status === 'connected') connectedUsers++;
-        }
-      }
-      return { ...session, connectedUsers };
-    });
+    const sessions = result.rows.map((session) => ({
+      ...session,
+      connectedUsers: getConnectedCount(session.roomId),
+    }));
 
     return res.status(200).json({ success: true, data: sessions });
   } catch (err) {
@@ -49,14 +42,8 @@ const getRoomDetail = async (req, res) => {
     }
 
     const session = result.rows[0];
-    const rooms = getAllRooms();
-    const room = rooms.get(roomId);
-    let connectedUsers = 0;
-    if (room) {
-      for (const u of room.users.values()) {
-        if (u.status === 'connected') connectedUsers++;
-      }
-    }
+    const room = getRoom(roomId);
+    const connectedUsers = room ? getConnectedCount(roomId) : 0;
 
     return res.status(200).json({
       success: true,

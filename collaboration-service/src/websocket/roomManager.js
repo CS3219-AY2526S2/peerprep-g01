@@ -1,40 +1,89 @@
+// In-memory store for active collaboration rooms.
+// Keyed by roomId. Populated on session creation, cleaned up on session end.
+
 const rooms = new Map();
-// rooms.set(roomId, { sessionId, roomId, questionId, question, users: new Map(), createdAt })
 
-const createRoom = (roomId, data) => {
+/**
+ * Create a new room entry.
+ * @param {string} roomId
+ * @param {object} data - { sessionId, questionId, question, userOneId, userTwoId, createdAt }
+ */
+function createRoom(roomId, data) {
   rooms.set(roomId, {
-    ...data,
+    sessionId: data.sessionId,
     roomId,
-    users: new Map(),
-    createdAt: Date.now(),
+    questionId: data.questionId,
+    question: data.question,
+    userOneId: data.userOneId,
+    userTwoId: data.userTwoId,
+    users: new Map(), // userId → { socketId, status, disconnectedAt }
+    createdAt: data.createdAt || new Date().toISOString(),
   });
-};
+}
 
-const getRoom = (roomId) => rooms.get(roomId);
-const deleteRoom = (roomId) => rooms.delete(roomId);
-const getAllRooms = () => rooms;
+/**
+ * Get a room by roomId. Returns undefined if not found.
+ */
+function getRoom(roomId) {
+  return rooms.get(roomId);
+}
 
-const addUser = (roomId, userId, socketId) => {
+/**
+ * Delete a room entry.
+ */
+function deleteRoom(roomId) {
+  rooms.delete(roomId);
+}
+
+/**
+ * Get all rooms (for admin listing).
+ */
+function getAllRooms() {
+  return Array.from(rooms.values());
+}
+
+/**
+ * Add or update a user in a room.
+ * @param {string} roomId
+ * @param {string} userId
+ * @param {string} socketId
+ */
+function addUser(roomId, userId, socketId) {
   const room = rooms.get(roomId);
   if (!room) return;
-  room.users.set(userId, { socketId, status: 'connected', disconnectedAt: null });
-};
+  room.users.set(userId, {
+    socketId,
+    status: 'connected',
+    disconnectedAt: null,
+  });
+}
 
-const removeUser = (roomId, userId) => {
+/**
+ * Remove a user from a room.
+ */
+function removeUser(roomId, userId) {
   const room = rooms.get(roomId);
   if (!room) return;
   room.users.delete(userId);
-};
+}
 
-const setUserStatus = (roomId, userId, status) => {
+/**
+ * Set a user's status within a room.
+ * @param {string} status - 'connected' | 'disconnected' | 'left'
+ */
+function setUserStatus(roomId, userId, status, disconnectedAt = null) {
   const room = rooms.get(roomId);
   if (!room) return;
   const user = room.users.get(userId);
   if (!user) return;
   user.status = status;
-};
+  user.disconnectedAt = disconnectedAt;
+}
 
-const getConnectedCount = (roomId) => {
+/**
+ * Get connected user count for a room (for admin view).
+ */
+function getConnectedCount(roomId) {
   const room = rooms.get(roomId);
   if (!room) return 0;
   let count = 0;
@@ -42,6 +91,16 @@ const getConnectedCount = (roomId) => {
     if (u.status === 'connected') count++;
   }
   return count;
-};
+}
 
-module.exports = { createRoom, getRoom, deleteRoom, getAllRooms, addUser, removeUser, setUserStatus, getConnectedCount };
+module.exports = {
+  rooms,
+  createRoom,
+  getRoom,
+  deleteRoom,
+  getAllRooms,
+  addUser,
+  removeUser,
+  setUserStatus,
+  getConnectedCount,
+};
