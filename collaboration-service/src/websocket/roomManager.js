@@ -18,7 +18,7 @@ function createRoom(roomId, data) {
     userOneId: data.userOneId,
     userTwoId: data.userTwoId,
     users: new Map(), // userId → { socketId, status, disconnectedAt }
-    yjsDoc: new Y.Doc(),
+    yjsDoc: data.yjsDoc || new Y.Doc(),
     createdAt: data.createdAt || new Date().toISOString(),
   });
 }

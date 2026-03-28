@@ -1,5 +1,6 @@
 const Y = require('yjs');
 const { getRoom } = require('./roomManager');
+const { scheduleDocPersist, flushDocPersist } = require('../services/docPersistService');
 
 /**
  * Sets up Y.js document sync and awareness relay for a connected socket.
@@ -34,12 +35,15 @@ function setupYjs(socket, roomId) {
   const handleUpdate = (update, origin) => {
     if (origin !== socket.id) return;
     socket.to(roomId).emit('yjs-update', update);
+    scheduleDocPersist(roomId, doc);
   };
   doc.on('update', handleUpdate);
 
-  // Clean up doc listener on disconnect to avoid stale handlers accumulating
+  // On disconnect: clean up listener and immediately flush any pending debounce
+  // so edits aren't lost if the user closed the tab before the 3s debounce fired
   socket.on('disconnect', () => {
     doc.off('update', handleUpdate);
+    flushDocPersist(roomId, doc);
   });
 
   // Relay awareness updates (cursor positions, user presence) to partner

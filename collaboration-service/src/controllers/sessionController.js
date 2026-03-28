@@ -27,9 +27,9 @@ const createSession = async (req, res) => {
 
   try {
     await db.query(
-      `INSERT INTO "session" ("sessionId", "roomId", "questionId", "userOneId", "userTwoId")
-       VALUES ($1, $2, $3, $4, $5)`,
-      [sessionId, roomId, question.questionId, userOneId, userTwoId]
+      `INSERT INTO "session" ("sessionId", "roomId", "questionId", "question", "userOneId", "userTwoId")
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [sessionId, roomId, question.questionId, JSON.stringify(question), userOneId, userTwoId]
     );
 
     createRoom(roomId, {
