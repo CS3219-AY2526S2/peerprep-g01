@@ -14,6 +14,10 @@ const { createRoom } = require('../websocket/roomManager');
  * TODO: re-enable serviceAuthMiddleware once Matching Service sends X-Service-Secret header
  */
 const createSession = async (req, res) => {
+  if (!req.body) {
+    return res.status(400).json({ success: false, message: 'Request body is required' });
+  }
+
   const { sessionId, userOneId, userTwoId, question } = req.body;
 
   if (!sessionId || !userOneId || !userTwoId || !question?.questionId) {
