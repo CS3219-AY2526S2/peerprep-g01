@@ -2,6 +2,7 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { getRoom, addUser, setUserStatus } = require('./roomManager');
 const { setupYjs } = require('./yjsHandler');
+const { endSession } = require('../services/sessionService');
 
 const RECONNECT_TIMEOUT_MS = 30 * 1000;
 
@@ -110,7 +111,9 @@ function checkBothLeft(io, roomId) {
   if (!room) return;
   const allLeft = Array.from(room.users.values()).every((u) => u.status === 'left');
   if (allLeft) {
-    // TODO PR6: endSession(roomId)
+    endSession(roomId).catch((err) => {
+      console.error(`[socket] endSession failed for room ${roomId}:`, err.message);
+    });
   }
 }
 
