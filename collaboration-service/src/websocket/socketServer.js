@@ -1,6 +1,7 @@
 const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { getRoom, addUser, setUserStatus } = require('./roomManager');
+const { setupYjs } = require('./yjsHandler');
 
 const RECONNECT_TIMEOUT_MS = 30 * 1000;
 
@@ -58,6 +59,9 @@ function initSocketServer(server) {
 
     // Send question data to the joining user
     socket.emit('question', room.question);
+
+    // Set up Y.js doc sync for this socket
+    setupYjs(socket, roomId);
 
     // Notify partner
     socket.to(roomId).emit('partner_joined', { userId });
