@@ -1,6 +1,7 @@
 // In-memory store for active collaboration rooms.
 // Keyed by roomId. Populated on session creation, cleaned up on session end.
 
+const Y = require('yjs');
 const rooms = new Map();
 
 /**
@@ -17,6 +18,7 @@ function createRoom(roomId, data) {
     userOneId: data.userOneId,
     userTwoId: data.userTwoId,
     users: new Map(), // userId → { socketId, status, disconnectedAt }
+    yjsDoc: new Y.Doc(),
     createdAt: data.createdAt || new Date().toISOString(),
   });
 }
@@ -32,6 +34,8 @@ function getRoom(roomId) {
  * Delete a room entry.
  */
 function deleteRoom(roomId) {
+  const room = rooms.get(roomId);
+  if (room && room.yjsDoc) room.yjsDoc.destroy();
   rooms.delete(roomId);
 }
 
