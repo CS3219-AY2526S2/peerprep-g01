@@ -16,7 +16,7 @@ const HOW_IT_WORKS = [
   { step: 1, title: "Choose Topic", description: "Select the coding topic you want to practice"},
   { step: 2, title: "Pick Difficulty", description: "Select Easy, Medium or Hard level"},
   { step: 3, title: "Get Matched", description: "Queue for another coder to join your session"},
-  { step: 4, title: "Solve Together", description: "Collabrate and solve problem as a pair"},
+  { step: 4, title: "Solve Together", description: "Collaborate and solve problem as a pair"},
 ]
 
 function UserHomePage() {
