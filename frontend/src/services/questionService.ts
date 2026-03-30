@@ -118,4 +118,19 @@ async function updateQuestion(
   return response.json();
 }
 
-export { fetchQuestions, deleteQuestion, updateQuestion, addQuestion };
+async function fetchTopics(): Promise<{ data: { topicId: string; topicName: string}[] }> {
+  const response = await apiFetch(`${BASE_URL}/api/questions/topic`);
+  if(!response.ok) {
+    let message = "Fetch topics request failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+  return response.json();
+}
+
+export { fetchQuestions, deleteQuestion, updateQuestion, addQuestion, fetchTopics };
