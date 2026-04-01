@@ -1,14 +1,14 @@
 import { Box, Button, IconButton, TableCell, TableRow } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AdminSideMenu from "../features/admin/AdminSideMenu";
-import AdminTable from "../features/admin/AdminTable";
-import SearchBar from "../components/SearchBar";
-import AdminTableAddButton from "../components/RoundedFilledButton";
-import useQuestion from "../hooks/useQuestion";
+import AdminSideMenu from "../../features/admin/AdminSideMenu";
+import AdminTable from "../../features/admin/AdminTable";
+import SearchBar from "../../components/SearchBar";
+import AdminTableAddButton from "../../components/RoundedFilledButton";
+import useQuestion from "../../hooks/useQuestion";
 import { useEffect, useState } from "react";
-import type Question from "../types/question";
-import DeletePopUp from "../features/admin/DeletePopUp";
-import QuestionForm from "../features/admin/QuestionForm";
+import type Question from "../../types/question";
+import DeletePopUp from "../../features/admin/DeletePopUp";
+import QuestionForm from "../../features/admin/QuestionForm";
 
 function ManageQuestionPage() {
   const tableFields = [

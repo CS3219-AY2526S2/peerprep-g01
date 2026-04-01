@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
-import AdminSideMenu from "../features/admin/AdminSideMenu";
-import AdminTable from "../features/admin/AdminTable";
-import SearchBar from "../components/SearchBar";
+import AdminSideMenu from "../../features/admin/AdminSideMenu";
+import AdminTable from "../../features/admin/AdminTable";
+import SearchBar from "../../components/SearchBar";
 
 const tableFields = [
   "Room-ID",
