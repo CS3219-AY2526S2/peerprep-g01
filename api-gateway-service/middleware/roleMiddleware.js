@@ -11,6 +11,7 @@ function roleMiddleware(allowedRoles) {
   };
 }
 exports.roleMiddleware = roleMiddleware;
+
 function methodRoleMiddleware(req, res, next) {
   const writesMethods = ["POST", "PUT", "DELETE"];
   if (writesMethods.includes(req.method)) {

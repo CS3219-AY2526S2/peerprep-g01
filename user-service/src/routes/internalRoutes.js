@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const serviceAuthMiddleware = require('../middleware/serviceAuthMiddleware');
+const serviceAuthMiddleware = require('../../../api-gateway-service/middleware/serviceAuthMiddleware');
 const { createHistoryInternal, getUserHistory } = require('../controllers/internalController');
 
 router.post('/question_history', serviceAuthMiddleware, createHistoryInternal);
