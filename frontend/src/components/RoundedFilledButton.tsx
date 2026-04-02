@@ -3,9 +3,10 @@ import AddIcon from "@mui/icons-material/Add";
 
 interface AdminTableAddButtonProps {
   label?: string;
+  onClick?: () => void;
 }
 
-function AdminTableAddButton({ label }: AdminTableAddButtonProps) {
+function AdminTableAddButton({ label, onClick }: AdminTableAddButtonProps) {
   return (
     <Button
       size="medium"
@@ -17,6 +18,7 @@ function AdminTableAddButton({ label }: AdminTableAddButtonProps) {
         fontSize: 10,
         textTransform: "none",
       }}
+      onClick={onClick}
     >
       {label}
     </Button>

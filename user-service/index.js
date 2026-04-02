@@ -5,6 +5,7 @@ const userRoutes = require("./src/routes/userRoutes");
 const authRoutes = require("./src/routes/authRoutes");
 const questionHistoryRoutes = require("./src/routes/questionHistoryRoutes");
 const adminRoutes = require("./src/routes/adminRoutes");
+const internalRoutes = require("./src/routes/internalRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -16,6 +17,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/question_history", questionHistoryRoutes);
 app.use("/api/admins", adminRoutes);
+app.use("/api/internal", internalRoutes);
 
 app.get("/health", (req, res) => {
   res.json({ status: "ok", service: "user-service" });

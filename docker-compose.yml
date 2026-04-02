@@ -24,6 +24,7 @@ services:
       PORT: 3001
       DATABASE_URL: postgresql://postgres:password123@user-db:5432/peerprep_db
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET:-peerprep-internal-service-key-2026}
       FRONTEND_URL: http://localhost
     ports:
       - "3001:3001"
@@ -80,6 +81,7 @@ services:
       FRONTEND_URL: http://localhost
       USER_SERVICE_URL: http://user-app:3001
       QUESTION_SERVICE_URL: http://questionbank-app:3002
+      COLLAB_SERVICE_URL: http://collab-app:3004
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
     ports:
       - "3000:3000"
@@ -87,6 +89,7 @@ services:
       - user-app
       - questionbank-app
       - matching-app
+      - collab-app
     networks:
       - peerprep-network
 
@@ -142,6 +145,44 @@ services:
     networks:
       - peerprep-network
 
+  # ---------- Collaboration Service -------
+  collab-db:
+    image: postgres:16-alpine
+    container_name: peerprep_collab_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_collab_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./collaboration-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - collab_pgdata:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
+
+  collab-app:
+    build: ./collaboration-service
+    container_name: peerprep_collab_app
+    restart: always
+    environment:
+      PORT: 3004
+      DATABASE_URL: postgresql://postgres:password123@collab-db:5432/peerprep_collab_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET:-peerprep-internal-service-key-2026}
+      USER_SERVICE_URL: http://user-app:3001
+      FRONTEND_URL: http://localhost
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./collaboration-service:/app
+      - /app/node_modules
+    depends_on:
+      - collab-db
+    networks:
+      - peerprep-network
+
   # ---------- pgAdmin (optional) ----------
   pgadmin:
     image: dpage/pgadmin4
@@ -166,3 +207,4 @@ volumes:
   user_pgdata:
   qb_pgdata:
   redis-data:
+  collab_pgdata:
