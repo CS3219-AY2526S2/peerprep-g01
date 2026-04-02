@@ -7,6 +7,8 @@ const tableTheme = createTheme({
         root: {
           paddingLeft: "32px",
           paddingRight: "32px",
+          paddingTop: "12px",
+          paddingBottom: "12px",
         },
       },
     },
