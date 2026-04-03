@@ -2,6 +2,7 @@ const { Server } = require('socket.io');
 const jwt = require('jsonwebtoken');
 const { getRoom, addUser, setUserStatus } = require('./roomManager');
 const { setupYjs } = require('./yjsHandler');
+const { setupAudioHandler, getPartnerSocketId } = require('./audioHandler');
 const { endSession } = require('../services/sessionService');
 
 const RECONNECT_TIMEOUT_MS = 30 * 1000;
@@ -64,11 +65,19 @@ function initSocketServer(server) {
     // Set up Y.js doc sync for this socket
     setupYjs(socket, roomId);
 
+    // Set up audio signaling relay
+    setupAudioHandler(socket, io, roomId);
+
     // Notify partner
     socket.to(roomId).emit('partner_joined', { userId });
 
     // User explicitly leaves the session
     socket.on('leave_session', () => {
+      const r = getRoom(roomId);
+      if (r) {
+        const partnerSid = getPartnerSocketId(r, userId);
+        if (partnerSid) io.to(partnerSid).emit('partner-audio-stopped', { userId });
+      }
       setUserStatus(roomId, userId, 'left');
       socket.to(roomId).emit('partner_left', { userId });
       checkBothLeft(io, roomId);
@@ -85,6 +94,9 @@ function initSocketServer(server) {
 
       setUserStatus(roomId, userId, 'disconnected', Date.now());
       socket.to(roomId).emit('partner_disconnected', { userId });
+
+      const partnerSid = getPartnerSocketId(r, userId);
+      if (partnerSid) io.to(partnerSid).emit('partner-audio-stopped', { userId });
 
       // Grace period — treat as left if no reconnect within 30s
       const timer = setTimeout(() => {
