@@ -11,6 +11,7 @@ const {
 const { isValidDifficulty, isValidTopic } = require('../utils/index')
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-app:3001';
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL || 'http://questionbank-app:3002';
+const COLLAB_SERVICE_URL = process.env.COLLAB_SERVICE_URL || 'http://collab-app:3004';
 
 async function requestMatch(req, res) {
     const {userId, topic, difficulty} = req.body;
@@ -50,11 +51,29 @@ async function requestMatch(req, res) {
                 console.error('questionMetaData failed:', err.message)
             }
 
+            let roomId = null
+            try {
+                const collabRes = await axios.post(
+                    `${COLLAB_SERVICE_URL}/api/internal/sessions`,
+                    {
+                        sessionId: result.sessionId,
+                        userOneId: userId,
+                        userTwoId: result.matchedUserId,
+                        question,
+                    },
+                    { headers: { 'X-Service-Secret': process.env.SERVICE_SECRET } }
+                )
+                roomId = collabRes.data.data.roomId
+            } catch (err) {
+                console.error('Failed to create collab session:', err.message)
+            }
+
             const userAMatchedData = {
                 status: 'matched',
                 sessionId: result.sessionId,
                 matchedUserId: result.matchedUserId,
                 question,
+                roomId,
             }
 
             const userBMatchedData = {
@@ -62,6 +81,7 @@ async function requestMatch(req, res) {
                 sessionId: result.sessionId,
                 matchedUserId: userId,
                 question,
+                roomId,
             }
             await setMatchStatus(userId, userAMatchedData)
             await setMatchStatus(result.matchedUserId, userBMatchedData)
@@ -117,9 +137,6 @@ async function questionMetaData(userAId, userBId, topic, difficulty) {
         exclude:[...excludeSet],
     })
     return questionMetaData.data.data
-    // get back the question metadata
-    // route with session ID
-    // send it to collab service
 }
 
 module.exports = { requestMatch, cancelMatch, checkMatchStatus, questionMetaData }
