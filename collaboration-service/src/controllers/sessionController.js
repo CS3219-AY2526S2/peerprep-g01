@@ -11,7 +11,6 @@ const { createRoom } = require('../websocket/roomManager');
  * Body: { sessionId, userOneId, userTwoId, question }
  * Returns: { success: true, data: { sessionId, roomId } }
  *
- * TODO: re-enable serviceAuthMiddleware once Matching Service sends X-Service-Secret header
  */
 const createSession = async (req, res) => {
   if (!req.body) {
