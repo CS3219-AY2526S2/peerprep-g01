@@ -7,7 +7,7 @@ import {
   Typography,
 } from "@mui/material";
 import PageHeader from "../features/user/PageHeader";
-import UseCollabSession from "../hooks/useCollabSession";
+import useCollabSession from "../hooks/useCollabSession";
 import CollabPanel from "../features/user/CollabPanel";
 import CodeIcon from "@mui/icons-material/Code";
 import ChatIcon from "@mui/icons-material/Chat";
@@ -26,7 +26,7 @@ function CollabPage() {
     handleLeave,
     leaveDialogOpen,
     setLeaveDialogOpen,
-  } = UseCollabSession();
+  } = useCollabSession();
 
   return (
     <Box

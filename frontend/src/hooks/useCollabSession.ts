@@ -22,7 +22,7 @@ export interface UseCollabSessionReturn {
   setLeaveDialogOpen: (status: boolean) => void;
 }
 
-function UseCollabSession(): UseCollabSessionReturn {
+function useCollabSession(): UseCollabSessionReturn {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
 
@@ -117,4 +117,4 @@ function UseCollabSession(): UseCollabSessionReturn {
   };
 }
 
-export default UseCollabSession;
+export default useCollabSession;
