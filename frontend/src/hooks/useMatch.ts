@@ -6,7 +6,6 @@ import { fetchTopics } from "../services/questionService";
 import {
   joinMatchQueue as joinMatchQueueRequest,
   leaveMatchQueue as leaveMatchQueueRequest,
-  getMatchStatus as getMatchStatusRequest,
 } from "../services/matchService";
 import { useNavigate } from "react-router-dom";
 
@@ -39,7 +38,7 @@ export interface UseMatchReturn {
   handleEnterRoom: () => void;
 }
 
-const POLL_INTERVAL = 2000; // ms
+const MATCH_TIMEOUT_MS = 30000;
 
 function useMatch(): UseMatchReturn {
   const { user } = useAuthStore();
@@ -56,13 +55,13 @@ function useMatch(): UseMatchReturn {
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [elapsed, setElapsed] = useState(0);
 
-  const pollingRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  function stopPolling() {
-    if (pollingRef.current) {
-      clearInterval(pollingRef.current);
-      pollingRef.current = null;
+  function stopTimeout() {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
     }
   }
 
@@ -71,31 +70,6 @@ function useMatch(): UseMatchReturn {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  }
-
-  function startPolling() {
-    pollingRef.current = setInterval(async () => {
-      try {
-        const status = await getMatchStatusRequest();
-        if (status.status === "matched") {
-          stopPolling();
-          stopTimer();
-          setMatchResult({
-            sessionId: status.sessionId,
-            matchedUserId: status.matchedUserId,
-            roomId: status.roomId,
-            question: status.question ?? null,
-          });
-          setMatchState("matched");
-        } else if (status.status === "timeout") {
-          stopPolling();
-          stopTimer();
-          setMatchState("timeout");
-        }
-      } catch (err) {
-        console.error("polling error:", err);
-      }
-    }, POLL_INTERVAL);
   }
 
   function startTimer() {
@@ -122,32 +96,55 @@ function useMatch(): UseMatchReturn {
   // clean up on unmount
   useEffect(() => {
     return () => {
-      stopPolling();
       stopTimer();
+      stopTimeout();
     };
   }, []);
 
   async function handleMatchRequest() {
     if (!selectedTopic || !selectedDifficulty) return;
+
+    setMatchState("waiting");
+    setMatchResult(null);
+    startTimer();
+
+    timeoutRef.current = setTimeout(() => {
+      setMatchState("timeout");
+      stopTimer();
+    }, MATCH_TIMEOUT_MS);
+
     try {
-      await joinMatchQueueRequest(selectedTopic.topicId, selectedDifficulty);
-      setMatchState("waiting");
-      setMatchResult(null);
-      startTimer();
-      startPolling();
-    } catch (err) {
-      console.log(
-        "An unexpected error occurred while attempting to load questions",
-        err,
+      const res = await joinMatchQueueRequest(
+        selectedTopic.topicId,
+        selectedDifficulty,
       );
+      stopTimeout();
+      stopTimer();
+      if (res.status === "matched") {
+        setMatchResult({
+          sessionId: res.sessionId,
+          matchedUserId: res.matchedUserId,
+          roomId: res.roomId,
+          question: res.question ?? null,
+        });
+        setMatchState("matched");
+      } else if (res.status === "timeout") {
+        setMatchState("timeout");
+      }
+    } catch (err) {
+      console.error("Failed to join match queue:", err);
+      stopTimeout();
+      stopTimer();
+      setMatchState("idle");
     }
   }
 
   async function handleCancelMatch() {
-    stopPolling();
     stopTimer();
+    stopTimeout();
     setElapsed(0);
     setMatchState("idle");
+
     if (!selectedTopic || !selectedDifficulty) return;
     try {
       await leaveMatchQueueRequest(selectedTopic.topicId, selectedDifficulty);
@@ -157,6 +154,7 @@ function useMatch(): UseMatchReturn {
   }
 
   function handleEnterRoom() {
+    console.log("matchResult:", matchResult);
     if (!matchResult?.roomId) return;
     navigate(`/collab/${matchResult.roomId}`);
   }

@@ -11,6 +11,8 @@ import { useNavigate } from "react-router-dom";
 import GroupsIcon from "@mui/icons-material/Groups";
 import PageHeader from "../features/user/PageHeader";
 import useMatch from "../hooks/useMatch";
+import MatchLoadingDialog from "../features/user/MatchLoadingDialog";
+import MatchFoundDialog from "../features/user/MatchFoundDialog";
 
 const DIFFICULTIES = [
   {
@@ -69,7 +71,12 @@ function UserHomePage() {
     setSelectedTopic,
     selectedDifficulty,
     setSelectedDifficulty,
+    matchState,
+    matchResult,
+    elapsed,
     handleMatchRequest,
+    handleCancelMatch,
+    handleEnterRoom,
   } = useMatch();
 
   // Check if the user has admin privileges
@@ -78,6 +85,20 @@ function UserHomePage() {
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "#f5f5f5", pb: 6 }}>
       <PageHeader />
+      {/* Dialogs */}
+      <MatchLoadingDialog
+        open={matchState === "waiting"}
+        topic={selectedTopic?.topicName ?? ""}
+        difficulty={selectedDifficulty ?? ""}
+        elapsed={elapsed}
+        onCancel={handleCancelMatch}
+      />
+      <MatchFoundDialog
+        open={matchState === "matched"}
+        question={matchResult?.question ?? null}
+        onEnterRoom={handleEnterRoom}
+      />
+
       {/*Admin shortcut*/}
       {isAdmin && (
         <Button
