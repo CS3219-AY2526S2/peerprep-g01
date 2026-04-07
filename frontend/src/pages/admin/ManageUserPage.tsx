@@ -12,12 +12,12 @@ import {
   Button,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import AdminSideMenu from "../features/admin/AdminSideMenu";
-import AdminTable from "../features/admin/AdminTable";
-import SearchBar from "../components/SearchBar";
-import useUsers from "../hooks/useUsers";
+import AdminSideMenu from "../../features/admin/AdminSideMenu";
+import AdminTable from "../../features/admin/AdminTable";
+import SearchBar from "../../components/SearchBar";
+import useUsers from "../../hooks/useUsers";
 import { useEffect, useState } from "react";
-import type User from "../types/user";
+import type User from "../../types/user";
 
 function ManageUserPage() {
   const tableFields = [

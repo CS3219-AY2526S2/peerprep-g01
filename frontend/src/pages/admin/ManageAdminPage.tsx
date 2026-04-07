@@ -1,9 +1,9 @@
 import { Box, TableCell, TableRow } from "@mui/material";
-import AdminSideMenu from "../features/admin/AdminSideMenu";
-import AdminTable from "../features/admin/AdminTable";
-import AdminTableAddButton from "../components/RoundedFilledButton";
-import SearchBar from "../components/SearchBar";
-import useAdmins from "../hooks/useAdmin";
+import AdminSideMenu from "../../features/admin/AdminSideMenu";
+import AdminTable from "../../features/admin/AdminTable";
+import AdminTableAddButton from "../../components/RoundedFilledButton";
+import SearchBar from "../../components/SearchBar";
+import useAdmins from "../../hooks/useAdmin";
 import { useEffect } from "react";
 
 function ManageAdminPage() {

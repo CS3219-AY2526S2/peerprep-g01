@@ -7,23 +7,29 @@ import {
   DialogTitle,
 } from "@mui/material";
 
-interface DeletePopUpProps {
+interface ConfirmDialogProps {
   open: boolean;
   title: string;
   description: React.ReactNode;
-  isDeleting: boolean;
+  isLoading?: boolean;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  confirmColor?: "error" | "primary" | "warning" | "success";
   onConfirm: () => void;
   onCancel: () => void;
 }
 
-function DeletePopUp({
+function ConfirmDialog({
   open,
   title,
   description,
-  isDeleting,
+  isLoading = false,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  confirmColor = "primary",
   onConfirm,
   onCancel,
-}: DeletePopUpProps) {
+}: ConfirmDialogProps) {
   return (
     <Dialog open={open} onClose={onCancel}>
       <DialogTitle>{title}</DialogTitle>
@@ -31,18 +37,18 @@ function DeletePopUp({
         <DialogContentText>{description}</DialogContentText>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onCancel}>Cancel</Button>
+        <Button onClick={onCancel}>{cancelLabel}</Button>
         <Button
           onClick={onConfirm}
-          color="error"
+          color={confirmColor}
           variant="contained"
-          disabled={isDeleting}
+          disabled={isLoading}
         >
-          Delete
+          {confirmLabel}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
 
-export default DeletePopUp;
+export default ConfirmDialog;

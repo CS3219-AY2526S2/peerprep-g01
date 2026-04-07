@@ -8,11 +8,12 @@ import {
 import SignUp from "../pages/SignUpPage";
 import Login from "../pages/LoginPage";
 import UserHomePage from "../pages/UserHomePage";
-import ManageUserPage from "../pages/ManageUserPage";
-import ManageAdminPage from "../pages/ManageAdminPage";
-import ManageQuestionPage from "../pages/ManageQuestionPage";
-import ManageRoomPage from "../pages/ManageRoomPage";
+import ManageUserPage from "../pages/admin/ManageUserPage";
+import ManageAdminPage from "../pages/admin/ManageAdminPage";
+import ManageQuestionPage from "../pages/admin/ManageQuestionPage";
+import ManageRoomPage from "../pages/admin/ManageRoomPage";
 import useAuthStore from "../store/authStore";
+import CollabPage from "../pages/CollabPage";
 
 function UserLayout() {
   const token = useAuthStore.getState().token;
@@ -35,6 +36,7 @@ function AppRouter() {
 
         <Route path="/" element={<UserLayout />}>
           <Route path="home" element={<UserHomePage />} />
+          <Route path="session/:roomId" element={<CollabPage />}></Route>
         </Route>
 
         <Route path="/admin" element={<AdminLayout />}>

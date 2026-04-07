@@ -82,6 +82,7 @@ services:
       USER_SERVICE_URL: http://user-app:3001
       QUESTION_SERVICE_URL: http://questionbank-app:3002
       COLLAB_SERVICE_URL: http://collab-app:3004
+      MATCH_SERVICE_URL: http://matching-app:3003
       JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
     ports:
       - "3000:3000"
@@ -125,7 +126,7 @@ services:
       - redis-data:/data
     networks:
       - peerprep-network
-       
+
   # ---------- Frontend ----------
   frontend:
     build:
@@ -140,9 +141,9 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./frontend:/app           # Mounts local source to container
-      - /app/node_modules         # Prevents local node_modules from overwriting container's
-    command: pnpm dev --host      # Overrides Dockerfile CMD to run dev server
+      - ./frontend:/app # Mounts local source to container
+      - /app/node_modules # Prevents local node_modules from overwriting container's
+    command: pnpm dev --host # Overrides Dockerfile CMD to run dev server
     depends_on:
       - apigateway
     networks:
