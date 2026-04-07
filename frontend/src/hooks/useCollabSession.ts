@@ -5,14 +5,15 @@ import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import * as Y from "yjs";
 import { MonacoBinding } from "y-monaco";
-import type Question from "../types/question";
+import { useLocation } from "react-router-dom";
+import type { MatchQuestion } from "./useMatch";
 
 const COLLAB_URL = "http://localhost:3004";
 
 export type PartnerStatus = "waiting" | "connected" | "disconnected" | "left";
 
 export interface UseCollabSessionReturn {
-  question: Question | null;
+  question: MatchQuestion | null;
   partnerStatus: PartnerStatus;
   language: string;
   setLanguage: (lang: string) => void;
@@ -25,14 +26,16 @@ export interface UseCollabSessionReturn {
 function useCollabSession(): UseCollabSessionReturn {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const { token } = useAuthStore();
 
   const socketRef = useRef<Socket | null>(null);
   const ydocRef = useRef<Y.Doc | null>(null);
   const bindingRef = useRef<MonacoBinding | null>(null);
 
-  const [question, setQuestion] = useState<Question | null>(null);
+  const [question, setQuestion] = useState<MatchQuestion | null>(
+    location.state?.question ?? null,
+  );
   const [partnerStatus, setPartnerStatus] = useState<PartnerStatus>("waiting");
   const [language, setLanguage] = useState("javascript");
 
@@ -53,8 +56,8 @@ function useCollabSession(): UseCollabSessionReturn {
     socketRef.current = socket;
 
     // 3. Server → client events
-    socket.on("question", (data: Question) => {
-      setQuestion(data);
+    socket.on("question", (data: MatchQuestion) => {
+      setQuestion((prev) => prev ?? data);
     });
 
     socket.on("yjs-state", (state: Uint8Array) => {

@@ -61,7 +61,7 @@ function CollabPage() {
               </Typography>
               <Box sx={{ display: "flex", gap: 1 }}>
                 <ChipAttribute
-                  label={question?.topicId ?? "Loading Topic"}
+                  label={question?.topicName ?? "Loading Topic"}
                   color={pink}
                 />
                 <ChipAttribute

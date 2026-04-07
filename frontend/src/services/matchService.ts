@@ -12,9 +12,6 @@ async function joinMatchQueue(topic: string, difficulty: string) {
       difficulty,
     }),
   });
-  console.log(
-    `match request sent, attempting to join queue {${topic}, ${difficulty}}`,
-  );
   if (!response.ok) {
     let message = "Failed to join match queue";
     try {

@@ -166,7 +166,9 @@ function useMatch(): UseMatchReturn {
 
   function handleEnterRoom() {
     if (!matchResult?.roomId) return;
-    navigate(`/session/${matchResult.roomId}`);
+    navigate(`/session/${matchResult.roomId}`, {
+      state: { question: matchResult.question },
+    });
   }
 
   return {
