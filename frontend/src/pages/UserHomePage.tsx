@@ -240,6 +240,7 @@ function UserHomePage() {
             {/*Button*/}
             <Box sx={{ textAlign: "center" }}>
               <Button
+                onClick={handleMatchRequest}
                 variant="contained"
                 size="large"
                 startIcon={<GroupsIcon />}
