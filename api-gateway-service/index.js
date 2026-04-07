@@ -17,6 +17,7 @@ app.use(
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL;
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL;
 const COLLAB_SERVICE_URL = process.env.COLLAB_SERVICE_URL;
+const MATCH_SERVICE_URL = process.env.MATCH_SERVICE_URL;
 
 function authMiddleware(req, res, next) {
   const authHeader = req.headers.authorization;
@@ -123,6 +124,28 @@ app.use(
     target: COLLAB_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/collab/" },
+  }),
+);
+
+app.use(
+  "/api/match",
+  express.json(),
+  authMiddleware,
+  createProxyMiddleware({
+    target: MATCH_SERVICE_URL, // matching service port
+    changeOrigin: true,
+    pathRewrite: { "^/": "/match/" },
+    on: {
+      proxyReq: (proxyReq, req) => {
+        console.log("proxyReq fired, req.body:", req.body);
+        if (req.body) {
+          const body = JSON.stringify(req.body);
+          proxyReq.setHeader("Content-Type", "application/json");
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(body));
+          proxyReq.write(body);
+        }
+      },
+    },
   }),
 );
 
