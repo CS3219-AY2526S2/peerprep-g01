@@ -9,7 +9,7 @@ async function joinMatchQueue(topic: string, difficulty: string) {
     body: JSON.stringify({
       userId,
       topic,
-      difficulty: difficulty.toLowerCase(),
+      difficulty,
     }),
   });
   console.log(

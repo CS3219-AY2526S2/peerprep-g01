@@ -11,15 +11,26 @@ import { useNavigate } from "react-router-dom";
 
 type MatchState = "idle" | "waiting" | "matched" | "timeout";
 
+export interface MatchQuestion {
+  questionId: string;
+  questionName: string;
+  description: string;
+  difficulty: string;
+  topicId: number;
+  topicName: string;
+  publicTestCase: unknown[];
+  privateTestCase: unknown[];
+  createdAt: string;
+  modifiedAt: string;
+  createdBy: string;
+  modifiedBy: string;
+}
+
 export interface MatchResult {
   sessionId: string;
   matchedUserId: string;
   roomId: string;
-  question: {
-    title?: string;
-    difficulty?: string;
-    topic?: string;
-  } | null;
+  question: MatchQuestion | null;
 }
 
 export interface UseMatchReturn {
@@ -154,9 +165,8 @@ function useMatch(): UseMatchReturn {
   }
 
   function handleEnterRoom() {
-    console.log("matchResult:", matchResult);
     if (!matchResult?.roomId) return;
-    navigate(`/collab/${matchResult.roomId}`);
+    navigate(`/session/${matchResult.roomId}`);
   }
 
   return {

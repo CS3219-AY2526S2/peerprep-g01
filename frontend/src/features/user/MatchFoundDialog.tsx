@@ -10,14 +10,11 @@ import {
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CodeIcon from "@mui/icons-material/Code";
 import GroupsIcon from "@mui/icons-material/Groups";
+import type { MatchQuestion } from "../../hooks/useMatch";
 
 interface MatchFoundDialogProps {
   open: boolean;
-  question: {
-    title?: string;
-    difficulty?: string;
-    topic?: string;
-  } | null;
+  question: MatchQuestion | null;
   onEnterRoom: () => void;
 }
 
@@ -86,9 +83,9 @@ function MatchFoundDialog({
                   Your Question
                 </Typography>
               </Box>
-              {question.title && (
+              {question.questionName && (
                 <Typography variant="body2" fontWeight={600}>
-                  {question.title}
+                  {question.questionName}
                 </Typography>
               )}
               <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
@@ -104,9 +101,9 @@ function MatchFoundDialog({
                     }}
                   />
                 )}
-                {question.topic && (
+                {question.topicName && (
                   <Chip
-                    label={question.topic}
+                    label={question.topicName}
                     size="small"
                     variant="outlined"
                     sx={{ fontSize: 11 }}
