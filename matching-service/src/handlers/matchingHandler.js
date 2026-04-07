@@ -8,19 +8,19 @@ const {
     MATCH_TIMEOUT,
 } = require('../services/matchingQueue')
 
-const { isValidDifficulty, isValidTopic } = require('../utils/index')
+const { isValidDifficulty, isValidTopics } = require('../utils/index')
 const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-app:3001';
 const QUESTION_SERVICE_URL = process.env.QUESTION_SERVICE_URL || 'http://questionbank-app:3002';
 
 async function requestMatch(req, res) {
-    const {userId, topic, difficulty} = req.body;
+    const {userId, topic: topics, difficulty} = req.body;
 
-    if (!userId || !isValidTopic(topic) || !isValidDifficulty(difficulty) ) {
+    if (!userId || !isValidTopics(topics) || !isValidDifficulty(difficulty) ) {
         return res.status(400).json({error: 'userId, topic and difficulty are required'})
     }
 
-    await addToQueue(userId, topic, difficulty);
-    await setMatchStatus(userId, { status: 'waiting', topic, difficulty })
+    await addToQueue(userId, topics, difficulty);
+    await setMatchStatus(userId, { status: 'waiting', topic: topics, difficulty })
 
     const deadline = Date.now() + MATCH_TIMEOUT * 1000;
     
@@ -30,7 +30,7 @@ async function requestMatch(req, res) {
     const poll = async() => {
         if (cancelled) return;
         if ( Date.now() > deadline ) {
-            await removeFromQueue(userId, topic, difficulty);
+            await removeFromQueue(userId, topics, difficulty);
             await setMatchStatus(userId, { status: 'timeout', message: 'No match found'})
             return res.status(408).json({ status: 'timeout', message: 'No match found'})
         }
@@ -40,12 +40,12 @@ async function requestMatch(req, res) {
             return res.status(200).json(current)
         }
 
-        const result = await findMatch(userId, topic, difficulty)
+        const result = await findMatch(userId, topics, difficulty)
         
         if (result.matched) {
             let question = null
             try{
-                question = await questionMetaData( userId, result.matchedUserId, topic, difficulty)
+                question = await questionMetaData( userId, result.matchedUserId, result.matchedTopic, difficulty)
             } catch (err) {
                 console.error('questionMetaData failed:', err.message)
             }
@@ -73,13 +73,13 @@ async function requestMatch(req, res) {
 }
 
 async function cancelMatch(req, res) {
-    const { userId, topic, difficulty } = req.body 
+    const { userId, topics, difficulty } = req.body 
 
-    if ( !userId || !isValidTopic(topic) || !isValidDifficulty(difficulty) ) { 
+    if ( !userId || !isValidTopics(topics) || !isValidDifficulty(difficulty) ) { 
         return res.status(400).json({error: 'UserId, topicId and difficulty is required'})
     }
 
-    await removeFromQueue(userId, topic, difficulty);
+    await removeFromQueue(userId, topics, difficulty);
     await setMatchStatus(userId, {status: 'cancelled'})
 
     return res.status(200).json({message: 'Match Request Cancelled'})
