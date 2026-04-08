@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const authMiddleware = require('../middleware/authMiddleware');
+const { authMiddleware } = require('../../../api-gateway-service/middleware/authMiddleware');
 const { getHistory, createHistory, deleteHistory, deleteHistoryByQuestion } = require('../controllers/questionHistoryController');
 
 // GET /question_history — fetch authenticated user's question history
