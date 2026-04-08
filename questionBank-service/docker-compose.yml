@@ -1,0 +1,37 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: peerprep_question_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_question_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - qb_pgdata:/var/lib/postgresql/data
+    networks:
+      - qb-network
+
+  app:
+    build: .
+    container_name: peerprep_questionbank_app
+    restart: always
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:password123@db:5432/peerprep_question_db
+    ports:
+      - "3002:3002"
+    depends_on:
+      - db
+    networks:
+      - qb-network
+
+networks:
+  qb-network:
+    driver: bridge
+
+volumes:
+  qb_pgdata:

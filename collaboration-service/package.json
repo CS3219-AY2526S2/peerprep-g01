@@ -1,0 +1,29 @@
+{
+  "name": "collaboration-service",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "Collaboration service for PeerPrep — real-time code editor sessions",
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.3",
+    "lib0": "^0.2.117",
+    "pg": "^8.18.0",
+    "socket.io": "^4.8.3",
+    "y-protocols": "^1.0.7",
+    "yjs": "^13.6.30"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14",
+    "socket.io-client": "^4.8.3"
+  }
+}

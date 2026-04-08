@@ -1,0 +1,5 @@
+/* for global resets only */
+* {
+  margin: 0;
+  padding: 0;
+}

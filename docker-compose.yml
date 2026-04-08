@@ -1,0 +1,214 @@
+services:
+  # ---------- User service ----------
+  user-db:
+    image: postgres:16-alpine
+    container_name: peerprep_user_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - ./user-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - user_pgdata:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
+
+  user-app:
+    build: ./user-service
+    container_name: peerprep_user_app
+    restart: always
+    environment:
+      PORT: 3001
+      DATABASE_URL: postgresql://postgres:password123@user-db:5432/peerprep_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET:-peerprep-internal-service-key-2026}
+      FRONTEND_URL: http://localhost
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./user-service:/app
+      - /app/node_modules
+    depends_on:
+      - user-db
+    networks:
+      - peerprep-network
+
+  # ---------- Question bank ----------
+  questionbank-db:
+    image: postgres:16-alpine
+    container_name: peerprep_question_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_question_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./questionBank-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - qb_pgdata:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
+
+  questionbank-app:
+    build: ./questionBank-service
+    container_name: peerprep_questionbank_app
+    restart: always
+    environment:
+      PORT: 3002
+      DATABASE_URL: postgresql://postgres:password123@questionbank-db:5432/peerprep_question_db
+      USER_SERVICE_URL: http://peerprep_user_app:3001
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./questionBank-service:/app
+      - /app/node_modules
+    depends_on:
+      - questionbank-db
+    networks:
+      - peerprep-network
+
+  # ---------- ApiGateway --------
+  apigateway:
+    build: ./api-gateway-service
+    container_name: peerprep_apigateway
+    restart: always
+    environment:
+      PORT: 3000
+      FRONTEND_URL: http://localhost
+      USER_SERVICE_URL: http://user-app:3001
+      QUESTION_SERVICE_URL: http://questionbank-app:3002
+      COLLAB_SERVICE_URL: http://collab-app:3004
+      MATCH_SERVICE_URL: http://matching-app:3003
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+    ports:
+      - "3000:3000"
+    depends_on:
+      - user-app
+      - questionbank-app
+      - matching-app
+      - collab-app
+    networks:
+      - peerprep-network
+
+  # ---------- Matching Service ----
+  matching-app:
+    build: ./matching-service
+    container_name: peerprep_matching_app
+    restart: always
+    environment:
+      PORT: 3003
+      REDIS_URL: redis://matching-redis:6379
+      USER_SERVICE_URL: http://user-app:3001
+      QUESTION_SERVICE_URL: http://questionbank-app:3002
+      COLLAB_SERVICE_URL: http://collab-app:3004
+      SERVICE_SECRET: ${SERVICE_SECRET:-peerprep-internal-service-key-2026}
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./matching-service:/app
+      - /app/node_modules
+    depends_on:
+      - matching-redis
+      - collab-app
+    networks:
+      - peerprep-network
+
+  matching-redis:
+    image: redis:7-alpine
+    container_name: peerprep_matching_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    networks:
+      - peerprep-network
+
+  # ---------- Frontend ----------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+      args:
+        - VITE_API_BASE_URL=http://localhost:3000
+    environment:
+      - VITE_API_BASE_URL=http://localhost:3000
+    container_name: peerprep_frontend
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/app # Mounts local source to container
+      - /app/node_modules # Prevents local node_modules from overwriting container's
+    command: pnpm dev --host # Overrides Dockerfile CMD to run dev server
+    depends_on:
+      - apigateway
+    networks:
+      - peerprep-network
+
+  # ---------- Collaboration Service -------
+  collab-db:
+    image: postgres:16-alpine
+    container_name: peerprep_collab_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: peerprep_collab_db
+    ports:
+      - "5434:5432"
+    volumes:
+      - ./collaboration-service/src/models/init.sql:/docker-entrypoint-initdb.d/init.sql
+      - collab_pgdata:/var/lib/postgresql/data
+    networks:
+      - peerprep-network
+
+  collab-app:
+    build: ./collaboration-service
+    container_name: peerprep_collab_app
+    restart: always
+    environment:
+      PORT: 3004
+      DATABASE_URL: postgresql://postgres:password123@collab-db:5432/peerprep_collab_db
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-key-change-in-production}
+      SERVICE_SECRET: ${SERVICE_SECRET:-peerprep-internal-service-key-2026}
+      USER_SERVICE_URL: http://user-app:3001
+      FRONTEND_URL: http://localhost
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./collaboration-service:/app
+      - /app/node_modules
+    depends_on:
+      - collab-db
+    networks:
+      - peerprep-network
+
+  # ---------- pgAdmin (optional) ----------
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: peerprep_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - user-db
+      - questionbank-db
+    networks:
+      - peerprep-network
+
+networks:
+  peerprep-network:
+    driver: bridge
+
+volumes:
+  user_pgdata:
+  qb_pgdata:
+  redis-data:
+  collab_pgdata:
