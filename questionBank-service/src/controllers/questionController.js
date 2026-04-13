@@ -251,6 +251,11 @@ exports.deleteQuestion = async (req, res) => {
       const axios = require("axios");
       await axios.delete(
         `${process.env.USER_SERVICE_URL}/api/question_history/by-question/${questionId}`,
+        {
+          headers: {
+            "X-Service-Secret": process.env.SERVICE_SECRET,
+          },
+        },
       );
     } catch (cascadeErr) {
       // Log but don't fail the request — question is already deleted
