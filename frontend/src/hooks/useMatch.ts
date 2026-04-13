@@ -49,7 +49,7 @@ export interface UseMatchReturn {
   handleEnterRoom: () => void;
 }
 
-const MATCH_TIMEOUT_MS = 30000;
+const MATCH_TIMEOUT_MS = 30 * 1000; // must match backend MATCH_TIMEOUT in matchingQueue.js
 
 function useMatch(): UseMatchReturn {
   const { user } = useAuthStore();
@@ -76,6 +76,14 @@ function useMatch(): UseMatchReturn {
 
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Refs to always have latest values available in the unmount cleanup
+  const matchStateRef = useRef(matchState);
+  const selectedTopicsRef = useRef(selectedTopics);
+  const selectedDifficultyRef = useRef(selectedDifficulty);
+  useEffect(() => { matchStateRef.current = matchState; }, [matchState]);
+  useEffect(() => { selectedTopicsRef.current = selectedTopics; }, [selectedTopics]);
+  useEffect(() => { selectedDifficultyRef.current = selectedDifficulty; }, [selectedDifficulty]);
 
   function stopTimeout() {
     if (timeoutRef.current) {
@@ -116,6 +124,16 @@ function useMatch(): UseMatchReturn {
     return () => {
       stopTimer();
       stopTimeout();
+      if (
+        matchStateRef.current === "waiting" &&
+        selectedTopicsRef.current.length > 0 &&
+        selectedDifficultyRef.current
+      ) {
+        leaveMatchQueueRequest(
+          selectedTopicsRef.current.map((t) => Number(t.topicId)),
+          selectedDifficultyRef.current,
+        ).catch(() => {});
+      }
     };
   }, []);
 
@@ -129,6 +147,10 @@ function useMatch(): UseMatchReturn {
     timeoutRef.current = setTimeout(() => {
       setMatchState("timeout");
       stopTimer();
+      leaveMatchQueueRequest(
+        selectedTopics.map((t) => Number(t.topicId)),
+        selectedDifficulty!,
+      ).catch(() => {});
     }, MATCH_TIMEOUT_MS);
 
     try {
