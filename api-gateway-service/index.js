@@ -106,13 +106,24 @@ app.use(
 
 app.use(
   "/api/admins",
+  express.json(),
   authMiddleware,
   roleMiddleware(["3"]),
   createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/admins/" },
-    on: { proxyReq: forwardUserHeaders },
+    on: {
+      proxyReq: (proxyReq, req) => {
+        forwardUserHeaders(proxyReq, req);
+        if (req.body) {
+          const body = JSON.stringify(req.body);
+          proxyReq.setHeader("Content-Type", "application/json");
+          proxyReq.setHeader("Content-Length", Buffer.byteLength(body));
+          proxyReq.write(body);
+        }
+      },
+    },
   }),
 );
 
