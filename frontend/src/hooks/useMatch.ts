@@ -37,8 +37,8 @@ export interface UseMatchReturn {
   user: User | null;
   topics: Topic[];
   topicLoading: boolean;
-  selectedTopic: Topic | null;
-  setSelectedTopic: (topic: Topic | null) => void;
+  selectedTopics: Topic[];
+  toggleTopic: (topic: Topic) => void;
   selectedDifficulty: string | null;
   setSelectedDifficulty: (difficulty: string | null) => void;
   matchState: MatchState;
@@ -57,7 +57,15 @@ function useMatch(): UseMatchReturn {
 
   const [topics, setTopics] = useState<Topic[]>([]);
   const [topicLoading, setTopicsLoading] = useState(true);
-  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
+
+  function toggleTopic(topic: Topic) {
+    setSelectedTopics((prev) =>
+      prev.some((t) => t.topicId === topic.topicId)
+        ? prev.filter((t) => t.topicId !== topic.topicId)
+        : [...prev, topic],
+    );
+  }
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(
     "Easy",
   );
@@ -96,7 +104,6 @@ function useMatch(): UseMatchReturn {
       .then((res) => {
         const { data } = res;
         setTopics(data);
-        if (data.length > 0) setSelectedTopic(data[0]);
       })
       .catch((err) => {
         console.error("fetchTopics failed:", err);
@@ -113,7 +120,7 @@ function useMatch(): UseMatchReturn {
   }, []);
 
   async function handleMatchRequest() {
-    if (!selectedTopic || !selectedDifficulty) return;
+    if (selectedTopics.length === 0 || !selectedDifficulty) return;
 
     setMatchState("waiting");
     setMatchResult(null);
@@ -126,7 +133,7 @@ function useMatch(): UseMatchReturn {
 
     try {
       const res = await joinMatchQueueRequest(
-        selectedTopic.topicId,
+        selectedTopics.map((t) => Number(t.topicId)),
         selectedDifficulty,
       );
       stopTimeout();
@@ -156,9 +163,12 @@ function useMatch(): UseMatchReturn {
     setElapsed(0);
     setMatchState("idle");
 
-    if (!selectedTopic || !selectedDifficulty) return;
+    if (selectedTopics.length === 0 || !selectedDifficulty) return;
     try {
-      await leaveMatchQueueRequest(selectedTopic.topicId, selectedDifficulty);
+      await leaveMatchQueueRequest(
+        selectedTopics.map((t) => Number(t.topicId)),
+        selectedDifficulty,
+      );
     } catch (err) {
       console.error("Failed to cancel match:", err);
     }
@@ -173,10 +183,10 @@ function useMatch(): UseMatchReturn {
 
   return {
     user,
-    selectedTopic,
+    selectedTopics,
+    toggleTopic,
     topics,
     topicLoading,
-    setSelectedTopic,
     selectedDifficulty,
     setSelectedDifficulty,
     matchState,

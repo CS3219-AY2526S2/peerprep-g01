@@ -2,14 +2,14 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 import apiFetch from "../utils/apiFetch";
 import useAuthStore from "../store/authStore";
 
-async function joinMatchQueue(topic: string, difficulty: string) {
+async function joinMatchQueue(topics: number[], difficulty: string) {
   const userId = useAuthStore.getState().user?.userId;
   const response = await apiFetch(`${BASE_URL}/api/match`, {
     method: "POST",
     body: JSON.stringify({
       userId,
-      topic,
-      difficulty,
+      topics,
+      difficulty: difficulty.toLowerCase(),
     }),
   });
   if (!response.ok) {
@@ -25,11 +25,11 @@ async function joinMatchQueue(topic: string, difficulty: string) {
   return response.json();
 }
 
-async function leaveMatchQueue(topic: string, difficulty: string) {
+async function leaveMatchQueue(topics: number[], difficulty: string) {
   const userId = useAuthStore.getState().user?.userId;
   const response = await apiFetch(`${BASE_URL}/api/match`, {
     method: "DELETE",
-    body: JSON.stringify({ userId, topic, difficulty }),
+    body: JSON.stringify({ userId, topics, difficulty: difficulty.toLowerCase() }),
   });
   if (!response.ok) {
     let message = "Failed to leave match queue";

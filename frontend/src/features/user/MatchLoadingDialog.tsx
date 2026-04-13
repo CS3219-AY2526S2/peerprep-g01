@@ -10,7 +10,7 @@ import kermitImg from "../../assets/waiting-kermit.png";
 
 interface MatchLoadingDialogProps {
   open: boolean;
-  topic: string;
+  topics: string[];
   difficulty: string;
   elapsed: number;
   onCancel: () => void;
@@ -24,7 +24,7 @@ const DIFFICULTY_COLORS: Record<string, { bg: string; color: string }> = {
 
 function MatchLoadingDialog({
   open,
-  topic,
+  topics,
   difficulty,
   elapsed,
   onCancel,
@@ -89,11 +89,14 @@ function MatchLoadingDialog({
               Selected Topics:
             </Typography>
             <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-              <Chip
-                label={topic}
-                variant="outlined"
-                sx={{ fontWeight: 700, borderRadius: 99 }}
-              />
+              {topics.map((t) => (
+                <Chip
+                  key={t}
+                  label={t}
+                  variant="outlined"
+                  sx={{ fontWeight: 700, borderRadius: 99 }}
+                />
+              ))}
             </Box>
           </Box>
 
