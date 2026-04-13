@@ -1,43 +1,43 @@
-# Question Bank Microservice
+# Question Bank Service
 
-Question bank microservice for PeerPrep. Uses PostgreSQL with init.sql for schema and sample data.
+Manages coding questions and topics. Uses PostgreSQL with `init.sql` for schema and sample data.
 
-## Setup
+## Local Development
 
-### 1. Install dependencies
 ```bash
 cd questionBank-service
-npm install
+pnpm install
+pnpm run dev
 ```
 
-### 2. Start the database (PostgreSQL on port 5433)
+Requires a PostgreSQL database. Start one via Docker:
+
 ```bash
-docker compose up -d
+docker compose up -d questionbank-db
 ```
 
-This runs `init.sql` to create the `question` table and seed sample questions.
+Runs on **port 3002** by default.
 
-### 3. Configure environment
-Create `.env` in the project root (or copy from `.env.example`):
-```
-PORT=3002
-DATABASE_URL=postgresql://postgres:password123@localhost:5433/peerprep_question_db
-```
+## Environment Variables
 
-### 4. Run the service
-```bash
-npm run dev
-```
-
-The service runs on **port 3002** by default.
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `3002` |
+| `DATABASE_URL` | PostgreSQL connection string | — |
+| `USER_SERVICE_URL` | User service URL (for cascade deletes) | — |
+| `SERVICE_SECRET` | Shared secret for S2S auth | — |
 
 ## API Endpoints
 
-- `GET /health` - Health check
-- `GET /api/questions` - List all questions (optional query: `?difficulty=easy&category=Array`)
-- `GET /api/questions/:questionId` - Get question by ID (e.g. Q-0001)
+### Questions
+- `GET /api/questions/` — List all questions (query: `?difficulty=easy&category=Array`)
+- `GET /api/questions/:questionId` — Get question by ID
+- `POST /api/questions/add` — Create a question
+- `PUT /api/questions/:questionId` — Update a question
+- `DELETE /api/questions/:questionId` — Delete a question
 
-## Running alongside user-service
+### Topics
+- `GET /api/questions/topics` — List all topics
 
-- **User service**: port 3001, DB on 5432 (peerprep_db)
-- **Question bank**: port 3002, DB on 5432 (peerprep_question_db)
+### Health
+- `GET /health` — Health check
