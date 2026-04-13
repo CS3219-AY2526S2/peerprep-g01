@@ -1,10 +1,12 @@
 const axios = require("axios");
+const redis = require("../config/redis");
 const {
   addToQueue,
   findMatch,
   removeFromQueue,
   setMatchStatus,
   getMatchStatus,
+  setBothMatchStatuses,
   MATCH_TIMEOUT,
 } = require("../services/matchingQueue");
 
@@ -52,10 +54,20 @@ async function requestMatch(req, res) {
     if (current && current.status === "matched") {
       return res.status(200).json(current);
     }
+    if (current && current.status === "cancelled") {
+      return;
+    }
 
     const result = await findMatch(userId, topics, difficulty);
 
     if (result.matched) {
+      const lockKey = `match:session:lock:${result.sessionId}`;
+      const acquired = await redis.set(lockKey, userId, "NX", "EX", 30);
+      if (!acquired) {
+        setTimeout(poll, 2000);
+        return;
+      }
+
       let question = null;
       try {
         question = await questionMetaData(
@@ -100,8 +112,9 @@ async function requestMatch(req, res) {
         question,
         roomId,
       };
-      await setMatchStatus(userId, userAMatchedData);
-      await setMatchStatus(result.matchedUserId, userBMatchedData);
+     
+      await setBothMatchStatuses(userId, userAMatchedData, result.matchedUserId, userBMatchedData);
+
       return res.status(200).json(userAMatchedData);
     }
     setTimeout(poll, 2000);
