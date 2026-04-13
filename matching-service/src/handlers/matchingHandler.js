@@ -61,6 +61,13 @@ async function requestMatch(req, res) {
     const result = await findMatch(userId, topics, difficulty);
 
     if (result.matched) {
+      // Re-check status — cancellation may have arrived while findMatch was running
+      const recheck = await getMatchStatus(userId);
+      if (recheck?.status === "cancelled" || recheck?.status === "timeout") {
+        setTimeout(poll, 2000);
+        return;
+      }
+
       const lockKey = `match:session:lock:${result.sessionId}`;
       const acquired = await redis.set(lockKey, userId, "NX", "EX", 30);
       if (!acquired) {

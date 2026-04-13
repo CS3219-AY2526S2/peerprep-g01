@@ -12,6 +12,9 @@ async function joinMatchQueue(topics: number[], difficulty: string) {
       difficulty,
     }),
   });
+  if (response.status === 408) {
+    return response.json(); // { status: "timeout" } — not an error, flows through normally
+  }
   if (!response.ok) {
     let message = "Failed to join match queue";
     try {
@@ -26,6 +29,7 @@ async function joinMatchQueue(topics: number[], difficulty: string) {
 }
 
 async function leaveMatchQueue(topics: number[], difficulty: string) {
+  console.log("user queue has been cancelled");
   const userId = useAuthStore.getState().user?.userId;
   const response = await apiFetch(`${BASE_URL}/api/match`, {
     method: "DELETE",
