@@ -61,6 +61,7 @@ services:
       PORT: 3002
       DATABASE_URL: postgresql://postgres:password123@questionbank-db:5432/peerprep_question_db
       USER_SERVICE_URL: http://peerprep_user_app:3001
+      SERVICE_SECRET: ${SERVICE_SECRET:-peerprep-internal-service-key-2026}
     ports:
       - "3002:3002"
     volumes:
