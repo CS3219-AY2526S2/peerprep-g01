@@ -67,8 +67,8 @@ function UserHomePage() {
     user,
     topics,
     topicLoading,
-    selectedTopic,
-    setSelectedTopic,
+    selectedTopics,
+    toggleTopic,
     selectedDifficulty,
     setSelectedDifficulty,
     matchState,
@@ -88,7 +88,7 @@ function UserHomePage() {
       {/* Dialogs */}
       <MatchLoadingDialog
         open={matchState === "waiting"}
-        topic={selectedTopic?.topicName ?? ""}
+        topics={selectedTopics.map((t) => t.topicName)}
         difficulty={selectedDifficulty ?? ""}
         elapsed={elapsed}
         onCancel={handleCancelMatch}
@@ -155,11 +155,11 @@ function UserHomePage() {
             ) : (
               <Grid container spacing={4} sx={{ mb: 3 }}>
                 {topics.map((t) => {
-                  const selected = selectedTopic === t;
+                  const selected = selectedTopics.some((s) => s.topicId === t.topicId);
                   return (
                     <Grid size={3} key={t.topicId}>
                       <Box
-                        onClick={() => setSelectedTopic(t)}
+                        onClick={() => toggleTopic(t)}
                         sx={{
                           border: selected
                             ? "2px solid #1976d2"
@@ -242,14 +242,17 @@ function UserHomePage() {
               <Typography variant="body2" fontWeight={600} fontSize={13}>
                 Selected:{" "}
               </Typography>
-              {selectedTopic && (
-                <Chip
-                  label={selectedTopic.topicName}
-                  size="small"
-                  color="primary"
-                  variant="outlined"
-                />
-              )}
+              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                {selectedTopics.map((t) => (
+                  <Chip
+                    key={t.topicId}
+                    label={t.topicName}
+                    size="small"
+                    color="primary"
+                    variant="outlined"
+                  />
+                ))}
+              </Box>
               <Chip
                 label={selectedDifficulty}
                 size="small"
