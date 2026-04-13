@@ -9,7 +9,7 @@ async function joinMatchQueue(topics: number[], difficulty: string) {
     body: JSON.stringify({
       userId,
       topics,
-      difficulty: difficulty.toLowerCase(),
+      difficulty,
     }),
   });
   if (!response.ok) {
@@ -29,7 +29,7 @@ async function leaveMatchQueue(topics: number[], difficulty: string) {
   const userId = useAuthStore.getState().user?.userId;
   const response = await apiFetch(`${BASE_URL}/api/match`, {
     method: "DELETE",
-    body: JSON.stringify({ userId, topics, difficulty: difficulty.toLowerCase() }),
+    body: JSON.stringify({ userId, topics, difficulty }),
   });
   if (!response.ok) {
     let message = "Failed to leave match queue";
