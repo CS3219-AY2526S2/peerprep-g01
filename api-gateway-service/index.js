@@ -72,6 +72,14 @@ app.use(
   }),
 );
 
+// Forward decoded user identity to downstream services via headers
+function forwardUserHeaders(proxyReq, req) {
+  if (req.user) {
+    proxyReq.setHeader("X-User-Id", req.user.userId);
+    proxyReq.setHeader("X-User-Role", req.user.role);
+  }
+}
+
 app.use(
   "/api/users",
   authMiddleware,
@@ -80,6 +88,7 @@ app.use(
     target: USER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/users/" },
+    on: { proxyReq: forwardUserHeaders },
   }),
 );
 
@@ -91,6 +100,7 @@ app.use(
     target: USER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/question_history/" },
+    on: { proxyReq: forwardUserHeaders },
   }),
 );
 
@@ -102,6 +112,7 @@ app.use(
     target: USER_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/admins/" },
+    on: { proxyReq: forwardUserHeaders },
   }),
 );
 
@@ -113,6 +124,7 @@ app.use(
     target: QUESTION_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/questions/" },
+    on: { proxyReq: forwardUserHeaders },
   }),
 );
 
@@ -124,6 +136,7 @@ app.use(
     target: COLLAB_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/api/collab/" },
+    on: { proxyReq: forwardUserHeaders },
   }),
 );
 
@@ -132,12 +145,12 @@ app.use(
   express.json(),
   authMiddleware,
   createProxyMiddleware({
-    target: MATCH_SERVICE_URL, // matching service port
+    target: MATCH_SERVICE_URL,
     changeOrigin: true,
     pathRewrite: { "^/": "/match/" },
     on: {
       proxyReq: (proxyReq, req) => {
-        console.log("proxyReq fired, req.body:", req.body);
+        forwardUserHeaders(proxyReq, req);
         if (req.body) {
           const body = JSON.stringify(req.body);
           proxyReq.setHeader("Content-Type", "application/json");

@@ -1,25 +1,20 @@
-const jwt = require('jsonwebtoken');
-
 /**
- * Middleware: Verify JWT and attach decoded user to req.user.
- * Expects header: Authorization: Bearer <token>
+ * Lightweight auth middleware that trusts the API Gateway.
+ *
+ * The gateway verifies the JWT and forwards the decoded identity as
+ * X-User-Id / X-User-Role headers. This middleware reads those headers
+ * and attaches them to req.user so controllers work unchanged.
  */
 const authMiddleware = (req, res, next) => {
-    const authHeader = req.headers.authorization;
+    const userId = req.headers['x-user-id'];
+    const role = req.headers['x-user-role'];
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ error: 'Unauthorized. No token provided.' });
+    if (!userId) {
+        return res.status(401).json({ error: 'Unauthorized. Missing user identity.' });
     }
 
-    const token = authHeader.split(' ')[1];
-
-    try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = { userId: decoded.userId, role: decoded.role };
-        next();
-    } catch (err) {
-        return res.status(401).json({ error: 'Unauthorized. Invalid or expired token.' });
-    }
+    req.user = { userId, role };
+    next();
 };
 
 module.exports = authMiddleware;
