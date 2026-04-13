@@ -3,10 +3,13 @@ const express = require('express');
 const questionRoutes = require('./src/routes/questionRoutes');
 const topicRoutes = require('./src/routes/topicRoutes');
 
+const authMiddleware = require('./src/middleware/authMiddleware');
+
 const app = express();
 const PORT = process.env.PORT || 3002;
 
 app.use(express.json());
+app.use(authMiddleware);
 
 app.use('/api/questions', topicRoutes);
 app.use('/api/questions', questionRoutes);
