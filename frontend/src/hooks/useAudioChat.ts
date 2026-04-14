@@ -118,7 +118,7 @@ export default function useAudioChat({
         socket.emit("audio-ready");
         console.log("[audio] emitted audio-ready");
 
-        if (partnerReadyRef.current && isUserOne) {
+        if (isUserOne) {
           await createOffer();
         }
       } catch (err) {
