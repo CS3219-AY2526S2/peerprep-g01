@@ -160,9 +160,10 @@ async function checkMatchStatus(req, res) {
 async function questionMetaData(userAId, userBId, topic, difficulty) {
   /* get question history from user A
     get question history from user B */
+  const s2sHeaders = { headers: { "X-Service-Secret": process.env.SERVICE_SECRET } };
   const [historyA, historyB] = await Promise.all([
-    axios.get(`${USER_SERVICE_URL}/api/users/question_history/${userAId}`),
-    axios.get(`${USER_SERVICE_URL}/api/users/question_history/${userBId}`),
+    axios.get(`${USER_SERVICE_URL}/api/users/question_history/${userAId}`, s2sHeaders),
+    axios.get(`${USER_SERVICE_URL}/api/users/question_history/${userBId}`, s2sHeaders),
   ]);
   // union both users question history
   const parseHistory = (data) => (data ? data.split(",").filter(Boolean) : []);

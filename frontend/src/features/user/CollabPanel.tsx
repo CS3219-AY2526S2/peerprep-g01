@@ -6,6 +6,7 @@ interface CollabPanelProps {
   Icon: ReactNode;
   children?: ReactNode;
   headerActions?: ReactNode;
+  allowOverflow?: boolean;
 }
 
 function CollabPanel({
@@ -13,6 +14,7 @@ function CollabPanel({
   Icon,
   children,
   headerActions,
+  allowOverflow = false,
 }: CollabPanelProps) {
   return (
     <Box
@@ -25,7 +27,7 @@ function CollabPanel({
         border: "1px solid",
         borderColor: "grey.400",
         borderRadius: 2,
-        overflow: "hidden",
+        overflow: allowOverflow ? "visible" : "hidden",
       }}
     >
       {/* Header */}
@@ -56,7 +58,12 @@ function CollabPanel({
 
       {/* Content */}
       <Box
-        sx={{ width: "100%", height: "100%", boxSizing: "border-box", p: 2.5 }}
+        sx={{
+          flexGrow: 1,
+          minHeight: 0,
+          overflow: allowOverflow ? "visible" : "auto",
+          p: 2.5,
+        }}
       >
         {children}
       </Box>

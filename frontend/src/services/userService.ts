@@ -110,4 +110,25 @@ async function logoutUser() {
   });
 }
 
-export { loginUser, logoutUser, fetchUsers, deleteUser, searchUser };
+async function registerUser(userName: string, email: string, password: string) {
+  const response = await fetch(`${BASE_URL}/api/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ userName, email, password }),
+  });
+
+  if (!response.ok) {
+    let message = "Registration failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export { loginUser, logoutUser, fetchUsers, deleteUser, searchUser, registerUser };

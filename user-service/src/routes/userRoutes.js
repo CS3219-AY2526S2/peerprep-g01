@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const serviceAuthMiddleware = require('../middleware/serviceAuthMiddleware');
 const { getUsers, getUserById, deleteUser, getUserQuestionHistoryId } = require('../controllers/userController');
 
 // Role checks are enforced by the API Gateway before requests reach here.
@@ -14,6 +15,6 @@ router.get('/:id', getUserById);
 router.delete('/:id', deleteUser);
 
 // GET /api/users/question_history/:userId — get IDs of user's question history
-router.get('/question_history/:userId', getUserQuestionHistoryId);
+router.get('/question_history/:userId', serviceAuthMiddleware, getUserQuestionHistoryId);
 
 module.exports = router;

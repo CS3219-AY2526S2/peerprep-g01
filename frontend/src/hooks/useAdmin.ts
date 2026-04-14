@@ -1,6 +1,10 @@
 import { useState } from "react";
 import type User from "../types/user";
-import { fetchAdmins } from "../services/adminService";
+import {
+  fetchAdmins,
+  createAdmin as createAdminService,
+  deleteAdmin as deleteAdminService,
+} from "../services/adminService";
 
 const PAGE_SIZE = 10;
 
@@ -10,8 +14,9 @@ function useAdmins() {
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
 
-  // fetch first page of users in database
   async function loadAdmins(targetPage: number = 1) {
     setIsLoading(true);
     setError(null);
@@ -36,9 +41,34 @@ function useAdmins() {
     if (page > 1) loadAdmins(page - 1);
   }
 
-  async function updateAdmin() {}
+  async function createAdmin(email: string) {
+    setIsCreating(true);
+    setError(null);
+    try {
+      await createAdminService(email);
+      await loadAdmins(page);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else console.log("An unexpected error occurred");
+      throw err;
+    } finally {
+      setIsCreating(false);
+    }
+  }
 
-  async function deleteAdmin() {}
+  async function deleteAdmin(email: string, userId: string) {
+    setDeletingUserId(userId);
+    setError(null);
+    try {
+      await deleteAdminService(email, userId);
+      await loadAdmins(page);
+    } catch (err) {
+      if (err instanceof Error) setError(err.message);
+      else console.log("An unexpected error occurred");
+    } finally {
+      setDeletingUserId(null);
+    }
+  }
 
   return {
     admins,
@@ -49,8 +79,10 @@ function useAdmins() {
     page,
     totalPages,
     loadPrevPage,
-    updateAdmin,
+    createAdmin,
     deleteAdmin,
+    deletingUserId,
+    isCreating,
   };
 }
 

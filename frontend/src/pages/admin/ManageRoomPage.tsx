@@ -15,7 +15,7 @@ const tableFields = [
 
 function ManageRoomPage() {
   return (
-    <Box sx={{ display: "flex", width: "100vw", height: "100vh" }}>
+    <Box sx={{ display: "flex", width: "100vw", height: "100vh", overflow: "hidden" }}>
       <AdminSideMenu />
       <AdminTable tableButtons={[<SearchBar />]} tableFields={tableFields} />
     </Box>

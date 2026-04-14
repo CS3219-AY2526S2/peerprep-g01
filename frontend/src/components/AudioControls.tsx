@@ -3,6 +3,7 @@ import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
 import useAudioChat from "../hooks/useAudioChat";
 import type { Socket } from "socket.io-client";
+import { useRef } from "react";
 
 interface AudioControlsProps {
   socket: Socket | null;
@@ -17,15 +18,18 @@ export default function AudioControls({
   isUserOne,
   roomId,
 }: AudioControlsProps) {
+  const remoteAudioRef = useRef<HTMLAudioElement>(null);
   const { micOn, partnerMicOn, audioConnected, toggleMic } = useAudioChat({
     socket,
     myUserId,
     isUserOne,
     roomId,
+    remoteAudioRef,
   });
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+      <audio ref={remoteAudioRef} autoPlay />
       <Tooltip title={micOn ? "Mute" : "Unmute"}>
         <IconButton
           onClick={toggleMic}
@@ -37,7 +41,11 @@ export default function AudioControls({
             height: 36,
           }}
         >
-          {micOn ? <MicIcon fontSize="small" /> : <MicOffIcon fontSize="small" />}
+          {micOn ? (
+            <MicIcon fontSize="small" />
+          ) : (
+            <MicOffIcon fontSize="small" />
+          )}
         </IconButton>
       </Tooltip>
 

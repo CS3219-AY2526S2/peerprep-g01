@@ -1,6 +1,6 @@
 import { useState } from "react";
 import useAuthStore from "../store/authStore";
-import { loginUser, logoutUser } from "../services/userService";
+import { loginUser, registerUser, logoutUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 
 function useAuth() {
@@ -33,12 +33,30 @@ function useAuth() {
     }
   }
 
-  async function logout() {
-    await logoutUser();
-    clearUser();
+  async function register(userName: string, email: string, password: string) {
+    setIsLoading(true);
+    setError(null);
+    try {
+      await registerUser(userName, email, password);
+      navigate("/login");
+      return true;
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        console.log("An unexpected error occurred");
+      }
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
   }
 
-  return { login, logout, error, isLoading };
+  async function logout() {
+    await logoutUser();
+  }
+
+  return { login, logout, register, error, isLoading };
 }
 
 export default useAuth;

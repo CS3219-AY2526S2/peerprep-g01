@@ -99,6 +99,7 @@ function AdminTable<T>({
             display: "flex",
             alignItems: "center",
             justifyContent: "flex-start",
+            flexWrap: "wrap",
             gap: 2,
             p: 2,
             borderBottom: "1px solid",
@@ -110,13 +111,13 @@ function AdminTable<T>({
           ))}
         </Box>
         {/*Table content */}
-        <TableContainer sx={{ flex: 1 }}>
-          <Table>
+        <TableContainer sx={{ flex: 1, overflowX: "auto" }}>
+          <Table sx={{ "& td": { px: 2 } }}>
             {/*Header*/}
             <TableHead>
               <TableRow sx={{ bgcolor: "grey.50" }}>
                 {tableFields.map((item, index) => (
-                  <TableCell key={index} sx={{ fontWeight: 500, py: 1, px: 4 }}>
+                  <TableCell key={index} sx={{ fontWeight: 500, py: 1, px: 2, whiteSpace: "nowrap" }}>
                     {item}
                   </TableCell>
                 ))}

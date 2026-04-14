@@ -16,6 +16,8 @@ import { pink, cyan, blue, green, orange } from "@mui/material/colors";
 import { Editor } from "@monaco-editor/react";
 import ChipAttribute from "../components/ChipAttribute";
 import ConfirmDialog from "../components/ConfirmDialog";
+import AudioControls from "../components/AudioControls";
+import useAuthStore from "../store/authStore";
 
 function CollabPage() {
   const {
@@ -26,7 +28,12 @@ function CollabPage() {
     handleLeave,
     leaveDialogOpen,
     setLeaveDialogOpen,
+    socket,
+    roomId,
+    isUserOne,
   } = useCollabSession();
+
+  const myUserId = useAuthStore((s) => s.user?.userId ?? "");
 
   return (
     <Box
@@ -42,15 +49,22 @@ function CollabPage() {
       <Box
         sx={{
           display: "grid",
-          gridTemplateColumns: "44% calc(56% - 12px)",
-          gridTemplateRows: "1fr 1fr",
+          gridTemplateColumns: { xs: "1fr", sm: "44% calc(56% - 12px)" },
+          gridTemplateRows: { xs: "auto auto 1fr", sm: "3fr 1fr" },
           gap: 1.5,
           p: 1.5,
           flexGrow: 1,
-          overflow: "hidden",
+          overflow: { xs: "auto", sm: "hidden" },
+          minWidth: 0,
         }}
       >
-        <Box sx={{ gridRow: "1 / 2", gridColumn: "1 /2", height: "100%" }}>
+        <Box
+          sx={{
+            gridRow: { sm: "1 / 2" },
+            gridColumn: { sm: "1 / 2" },
+            minHeight: { xs: 200 },
+          }}
+        >
           <CollabPanel
             title="Question"
             Icon={<ArticleIcon sx={{ color: blue["A400"] }} />}
@@ -76,10 +90,17 @@ function CollabPage() {
           </CollabPanel>
         </Box>
 
-        <Box sx={{ gridRow: "1 / 3", gridColumn: "2 / 3", height: "100%" }}>
+        <Box
+          sx={{
+            gridRow: { sm: "1 / 3" },
+            gridColumn: { sm: "2 / 3" },
+            minHeight: { xs: 400 },
+          }}
+        >
           <CollabPanel
             title="Code Editor"
             Icon={<CodeIcon sx={{ color: green[500] }} />}
+            allowOverflow
             headerActions={
               <Select
                 value={language}
@@ -113,12 +134,25 @@ function CollabPage() {
           </CollabPanel>
         </Box>
 
-        <Box sx={{ gridRow: "2 / 3", gridColumn: "1 / 2", height: "100%" }}>
+        <Box
+          sx={{
+            gridRow: { sm: "2 / 3" },
+            gridColumn: { sm: "1 / 2" },
+            minHeight: { xs: 200 },
+          }}
+        >
           <CollabPanel
             title="Communication"
             Icon={<ChatIcon sx={{ color: orange[400] }} />}
           >
-            {/* chat / video goes here */}
+            <Box sx={{ p: 1.5 }}>
+              <AudioControls
+                socket={socket}
+                myUserId={myUserId}
+                isUserOne={isUserOne}
+                roomId={roomId ?? ""}
+              />
+            </Box>
           </CollabPanel>
         </Box>
       </Box>
