@@ -3,11 +3,14 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import logo from "../../assets/peerprep-logo-nobg.png";
 import useAuth from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import { useState } from "react";
+import ConfirmDialog from "../../components/ConfirmDialog";
 
 function PageHeader() {
   const theme = useTheme();
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   function handleLogout() {
     logout();
@@ -35,9 +38,18 @@ function PageHeader() {
           padding: theme.spacing(0.8, 1, 0.6, 1),
         }}
       />
-      <IconButton onClick={handleLogout} sx={{ mr: 1 }} title="Logout">
+      <IconButton onClick={() => setLogoutOpen(true)} sx={{ mr: 1 }} title="Logout">
         <LogoutIcon />
       </IconButton>
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Logout"
+        description="Are you sure you want to logout?"
+        confirmLabel="Logout"
+        confirmColor="error"
+        onConfirm={handleLogout}
+        onCancel={() => setLogoutOpen(false)}
+      />
     </Box>
   );
 }

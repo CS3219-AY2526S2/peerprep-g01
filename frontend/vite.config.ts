@@ -9,7 +9,6 @@ export default defineConfig({
       usePolling: true, // Required for HMR to work reliably in Docker
     },
     host: true, // Needed to expose the server outside the container
-    port: 80,
   },
   test: {
     environment: "jsdom",

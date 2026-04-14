@@ -140,7 +140,7 @@ services:
     container_name: peerprep_frontend
     restart: always
     ports:
-      - "80:80"
+      - "80:5173"
     volumes:
       - ./frontend:/app # Mounts local source to container
       - /app/node_modules # Prevents local node_modules from overwriting container's

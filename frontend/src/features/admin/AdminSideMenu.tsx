@@ -16,6 +16,8 @@ import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
+import { useState } from "react";
+import ConfirmDialog from "../../components/ConfirmDialog";
 
 const DRAWER_WIDTH = 250;
 
@@ -25,6 +27,7 @@ function AdminSideMenu() {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   function handleLogout() {
     logout();
@@ -108,7 +111,7 @@ function AdminSideMenu() {
       <List>
         <ListItem disablePadding sx={{ px: 1 }}>
           <ListItemButton
-            onClick={handleLogout}
+            onClick={() => setLogoutOpen(true)}
             sx={{
               justifyContent: isCollapsed ? "center" : "flex-start",
               minHeight: 48,
@@ -121,6 +124,15 @@ function AdminSideMenu() {
           </ListItemButton>
         </ListItem>
       </List>
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Logout"
+        description="Are you sure you want to logout?"
+        confirmLabel="Logout"
+        confirmColor="error"
+        onConfirm={handleLogout}
+        onCancel={() => setLogoutOpen(false)}
+      />
     </Drawer>
   );
 }
