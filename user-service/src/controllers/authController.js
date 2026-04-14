@@ -14,14 +14,14 @@ const SALT_ROUNDS = 10;
  * Default role is '1' (User).
  */
 exports.register = async (req, res) => {
-    const { userName, email, password, role } = req.body;
+    const { userName, email, password } = req.body;
 
     if (!userName || !email || !password) {
         return res.status(400).json({ error: 'userName, email, and password are required.' });
     }
 
-    // default to regular user
-    const requestedRole = role || '1';
+    // Always register as regular user; promotion via /api/admins/create only
+    const requestedRole = '1';
 
     try {
         // check for duplicate email
