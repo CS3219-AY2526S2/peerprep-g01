@@ -22,4 +22,46 @@ async function fetchAdmins(page: number = 1, pageSize: number = 10) {
   return response.json();
 }
 
-export { fetchAdmins };
+async function createAdmin(email: string) {
+  const response = await apiFetch(`${BASE_URL}/api/admins/create`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email }),
+  });
+
+  if (!response.ok) {
+    let message = "Create admin failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+async function deleteAdmin(email: string, userId: string) {
+  const response = await apiFetch(`${BASE_URL}/api/admins/delete`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, userId }),
+  });
+
+  if (!response.ok) {
+    let message = "Delete admin failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
+export { fetchAdmins, createAdmin, deleteAdmin };
