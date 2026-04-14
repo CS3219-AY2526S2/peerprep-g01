@@ -6,6 +6,7 @@ interface UseAudioChatProps {
   myUserId: string;
   isUserOne: boolean;
   roomId: string;
+  remoteAudioRef: React.RefObject<HTMLAudioElement>;
 }
 
 interface UseAudioChatReturn {
@@ -25,8 +26,8 @@ const ICE_SERVERS: RTCConfiguration = {
 
 export default function useAudioChat({
   socket,
-  myUserId,
   isUserOne,
+  remoteAudioRef,
 }: UseAudioChatProps): UseAudioChatReturn {
   const [micOn, setMicOn] = useState(false);
   const [partnerMicOn, setPartnerMicOn] = useState(false);
@@ -34,7 +35,6 @@ export default function useAudioChat({
 
   const localStreamRef = useRef<MediaStream | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
-  const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const partnerReadyRef = useRef(false);
 
   const createPeerConnection = useCallback(() => {
@@ -47,36 +47,49 @@ export default function useAudioChat({
     });
 
     pc.ontrack = (event) => {
-      const audio = new Audio();
-      audio.srcObject = event.streams[0];
-      audio.play().catch(() => {});
-      remoteAudioRef.current = audio;
+      console.log("[audio] ontrack fired", event.streams);
+      if (remoteAudioRef.current) {
+        remoteAudioRef.current.srcObject = event.streams[0];
+        console.log("[audio] srcObject set on audio element");
+      } else {
+        console.error(
+          "[audio] remoteAudioRef is null — audio element not mounted",
+        );
+      }
       setAudioConnected(true);
     };
 
     pc.onicecandidate = (event) => {
+      console.log("[audio] ICE candidate", event.candidate);
       if (event.candidate) {
         socket.emit("ice-candidate", { candidate: event.candidate });
       }
     };
 
+    pc.onconnectionstatechange = () => {
+      console.log("[audio] connection state:", pc.connectionState);
+    };
+
     peerConnectionRef.current = pc;
     return pc;
-  }, [socket]);
+  }, [socket, remoteAudioRef]);
 
   const createOffer = useCallback(async () => {
+    console.log("[audio] creating offer, isUserOne:", isUserOne);
     const pc = createPeerConnection();
     if (!pc) return;
 
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
     socket!.emit("audio-offer", { offer });
-  }, [socket, createPeerConnection]);
+    console.log("[audio] offer emitted");
+  }, [socket, createPeerConnection, isUserOne]);
 
   const cleanup = useCallback(() => {
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
+      socket?.emit("audio-stopped");
     }
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
@@ -85,13 +98,12 @@ export default function useAudioChat({
     if (remoteAudioRef.current) {
       remoteAudioRef.current.pause();
       remoteAudioRef.current.srcObject = null;
-      remoteAudioRef.current = null;
     }
     partnerReadyRef.current = false;
     setMicOn(false);
     setPartnerMicOn(false);
     setAudioConnected(false);
-  }, []);
+  }, [socket, remoteAudioRef]);
 
   const toggleMic = useCallback(async () => {
     if (!socket) return;
@@ -104,6 +116,7 @@ export default function useAudioChat({
         localStreamRef.current = stream;
         setMicOn(true);
         socket.emit("audio-ready");
+        console.log("[audio] emitted audio-ready");
 
         if (partnerReadyRef.current && isUserOne) {
           await createOffer();
@@ -126,6 +139,15 @@ export default function useAudioChat({
     if (!socket) return;
 
     const onPartnerReady = async () => {
+      console.log("[audio] partner-audio-ready received");
+      console.log(
+        "[audio] isUserOne:",
+        isUserOne,
+        "| hasStream:",
+        !!localStreamRef.current,
+        "| hasPc:",
+        !!peerConnectionRef.current,
+      );
       partnerReadyRef.current = true;
       setPartnerMicOn(true);
 
@@ -135,6 +157,22 @@ export default function useAudioChat({
     };
 
     const onAudioOffer = async (data: { offer: RTCSessionDescriptionInit }) => {
+      console.log("[audio] received offer, creating answer");
+
+      // Ensure we have a stream before creating the peer connection
+      if (!localStreamRef.current) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          localStreamRef.current = stream;
+          setMicOn(true);
+        } catch (err) {
+          console.error("[audio] mic access denied on offer receive:", err);
+          return;
+        }
+      }
+
       const pc = createPeerConnection();
       if (!pc) return;
 
@@ -142,20 +180,20 @@ export default function useAudioChat({
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       socket.emit("audio-answer", { answer });
+      console.log("[audio] answer emitted");
     };
 
     const onAudioAnswer = async (data: {
       answer: RTCSessionDescriptionInit;
     }) => {
+      console.log("[audio] received answer, setting remote description");
       if (!peerConnectionRef.current) return;
       await peerConnectionRef.current.setRemoteDescription(
         new RTCSessionDescription(data.answer),
       );
     };
 
-    const onIceCandidate = async (data: {
-      candidate: RTCIceCandidateInit;
-    }) => {
+    const onIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
       if (!peerConnectionRef.current) return;
       await peerConnectionRef.current.addIceCandidate(
         new RTCIceCandidate(data.candidate),
@@ -173,7 +211,6 @@ export default function useAudioChat({
       if (remoteAudioRef.current) {
         remoteAudioRef.current.pause();
         remoteAudioRef.current.srcObject = null;
-        remoteAudioRef.current = null;
       }
       partnerReadyRef.current = false;
       setPartnerMicOn(false);

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
 import { Typography, Stack, Box, TextField, Button } from "@mui/material";
+import { Link } from "react-router-dom";
 
 function LoginForm() {
   const [email, setUserEmail] = useState("");
@@ -74,7 +75,10 @@ function LoginForm() {
           color="textSecondary"
           sx={{ textAlign: "center", width: 300, alignSelf: "center" }}
         >
-          Don't have an account yet? Sign up with us here instead!
+          Don't have an account yet?{" "}
+          <Link to="/signup" style={{ color: "inherit" }}>
+            Sign up here
+          </Link>
         </Typography>
       </Stack>
     </Stack>

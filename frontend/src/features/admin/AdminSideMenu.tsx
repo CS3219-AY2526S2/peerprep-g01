@@ -13,7 +13,11 @@ import AdminPanelSettingsOutlinedIcon from "@mui/icons-material/AdminPanelSettin
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
+import LogoutIcon from "@mui/icons-material/Logout";
 import { useNavigate, useLocation } from "react-router-dom";
+import useAuth from "../../hooks/useAuth";
+import { useState } from "react";
+import ConfirmDialog from "../../components/ConfirmDialog";
 
 const DRAWER_WIDTH = 250;
 
@@ -22,6 +26,13 @@ function AdminSideMenu() {
   const isCollapsed = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
   const location = useLocation();
+  const { logout } = useAuth();
+  const [logoutOpen, setLogoutOpen] = useState(false);
+
+  function handleLogout() {
+    logout();
+    navigate("/login");
+  }
 
   const navItems = [
     {
@@ -56,6 +67,8 @@ function AdminSideMenu() {
           width: isCollapsed ? theme.spacing(9) : DRAWER_WIDTH,
           boxSizing: "border-box",
           overflowX: "hidden",
+          display: "flex",
+          flexDirection: "column",
           transition: theme.transitions.create("width"),
         },
       }}
@@ -75,7 +88,7 @@ function AdminSideMenu() {
         />
       )}
 
-      <List>
+      <List sx={{ flexGrow: 1 }}>
         {navItems.map((item) => (
           <ListItem key={item.text} disablePadding sx={{ px: 1 }}>
             <ListItemButton
@@ -94,6 +107,32 @@ function AdminSideMenu() {
           </ListItem>
         ))}
       </List>
+
+      <List>
+        <ListItem disablePadding sx={{ px: 1 }}>
+          <ListItemButton
+            onClick={() => setLogoutOpen(true)}
+            sx={{
+              justifyContent: isCollapsed ? "center" : "flex-start",
+              minHeight: 48,
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40 }}>
+              <LogoutIcon />
+            </ListItemIcon>
+            {!isCollapsed && <ListItemText primary="Logout" />}
+          </ListItemButton>
+        </ListItem>
+      </List>
+      <ConfirmDialog
+        open={logoutOpen}
+        title="Logout"
+        description="Are you sure you want to logout?"
+        confirmLabel="Logout"
+        confirmColor="error"
+        onConfirm={handleLogout}
+        onCancel={() => setLogoutOpen(false)}
+      />
     </Drawer>
   );
 }
