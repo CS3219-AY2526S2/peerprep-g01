@@ -1,5 +1,5 @@
 import logo from "../assets/peerprep-logo-nobg.png";
-import { Grid, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import LoginForm from "../features/auth/LoginForm";
 
 const gridItem = {
@@ -35,6 +35,9 @@ function LoginPage() {
         </Typography>
       </Grid>
       <Grid size={{ xs: 12, md: 6 }} sx={{ ...gridItem, minWidth: 370 }}>
+        <Box sx={{ display: { xs: "block", md: "none" }, mb: 2, textAlign: "center" }}>
+          <img src={logo} alt="logo icon" style={{ width: 280 }} />
+        </Box>
         <Typography
           variant="h3"
           color="primary.main"
