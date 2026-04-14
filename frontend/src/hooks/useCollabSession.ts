@@ -21,6 +21,9 @@ export interface UseCollabSessionReturn {
   handleLeave: () => void;
   leaveDialogOpen: boolean;
   setLeaveDialogOpen: (status: boolean) => void;
+  socket: Socket | null;
+  roomId: string | undefined;
+  isUserOne: boolean;
 }
 
 function useCollabSession(): UseCollabSessionReturn {
@@ -38,6 +41,8 @@ function useCollabSession(): UseCollabSessionReturn {
   );
   const [partnerStatus, setPartnerStatus] = useState<PartnerStatus>("waiting");
   const [language, setLanguage] = useState("javascript");
+  const [socket, setSocket] = useState<Socket | null>(null);
+  const [isUserOne, setIsUserOne] = useState(false);
 
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
@@ -53,7 +58,17 @@ function useCollabSession(): UseCollabSessionReturn {
       auth: { token },
       query: { roomId },
     });
+
     socketRef.current = socket;
+    socket.on("connect", () => {
+      console.log("[collab] socket connected", socket.id);
+      setSocket(socket);
+    });
+
+    socket.on("role", (data: { isUserOne: boolean }) => {
+      console.log("[collab] role received", data);
+      setIsUserOne(data.isUserOne);
+    });
 
     // 3. Server → client events
     socket.on("question", (data: MatchQuestion) => {
@@ -90,6 +105,7 @@ function useCollabSession(): UseCollabSessionReturn {
       ydocRef.current = null;
       socket.disconnect();
       socketRef.current = null;
+      setSocket(null);
     };
   }, [token, roomId]);
 
@@ -117,6 +133,9 @@ function useCollabSession(): UseCollabSessionReturn {
     handleLeave,
     leaveDialogOpen,
     setLeaveDialogOpen,
+    socket,
+    roomId,
+    isUserOne,
   };
 }
 
