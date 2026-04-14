@@ -16,14 +16,14 @@ import useAuthStore from "../store/authStore";
 import CollabPage from "../pages/CollabPage";
 
 function UserLayout() {
-  const token = useAuthStore.getState().token;
-  if (!token) return <Navigate to="/login" replace />;
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
 function AdminLayout() {
-  const token = useAuthStore.getState().token;
-  if (!token) return <Navigate to="/login" replace />;
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
@@ -35,6 +35,7 @@ function AppRouter() {
         <Route path="/signup" element={<SignUp />} />
 
         <Route path="/" element={<UserLayout />}>
+          <Route index element={<Navigate to="/home" replace />} />
           <Route path="home" element={<UserHomePage />} />
           <Route path="session/:roomId" element={<CollabPage />}></Route>
         </Route>
