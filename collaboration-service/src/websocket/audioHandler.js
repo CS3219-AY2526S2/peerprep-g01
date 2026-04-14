@@ -69,6 +69,15 @@ function setupAudioHandler(socket, io, roomId) {
       io.to(partnerSocketId).emit('partner-audio-unmuted', { userId: socket.userId });
     }
   });
+
+  socket.on('audio-stopped', () => {
+    const room = getRoom(roomId);
+    if (!room) return;
+    const partnerSocketId = getPartnerSocketId(room, socket.userId);
+    if (partnerSocketId) {
+      io.to(partnerSocketId).emit('partner-audio-stopped', { userId: socket.userId });
+    }
+  });
 }
 
 module.exports = { setupAudioHandler, getPartnerSocketId };
