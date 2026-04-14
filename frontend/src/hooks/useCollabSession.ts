@@ -8,7 +8,7 @@ import { MonacoBinding } from "y-monaco";
 import { useLocation } from "react-router-dom";
 import type { MatchQuestion } from "./useMatch";
 
-const COLLAB_URL = "http://localhost:3004";
+const COLLAB_URL = import.meta.env.VITE_COLLAB_URL || "";
 
 export type PartnerStatus = "waiting" | "connected" | "disconnected" | "left";
 
