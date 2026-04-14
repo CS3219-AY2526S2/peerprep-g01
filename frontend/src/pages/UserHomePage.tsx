@@ -157,7 +157,7 @@ function UserHomePage() {
                 {topics.map((t) => {
                   const selected = selectedTopics.some((s) => s.topicId === t.topicId);
                   return (
-                    <Grid size={3} key={t.topicId}>
+                    <Grid size={{ xs: 6, md: 3 }} key={t.topicId}>
                       <Box
                         onClick={() => toggleTopic(t)}
                         sx={{
@@ -199,7 +199,7 @@ function UserHomePage() {
               {DIFFICULTIES.map((d) => {
                 const selected = selectedDifficulty === d.label;
                 return (
-                  <Grid key={d.label} size={4}>
+                  <Grid key={d.label} size={{ xs: 12, sm: 4 }}>
                     <Box
                       onClick={() => setSelectedDifficulty(d.label)}
                       sx={{
@@ -307,7 +307,7 @@ function UserHomePage() {
         </Typography>
         <Grid container spacing={2}>
           {HOW_IT_WORKS.map((item) => (
-            <Grid size={3} key={item.step}>
+            <Grid size={{ xs: 6, md: 3 }} key={item.step}>
               <Box
                 sx={{
                   width: 40,
