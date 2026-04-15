@@ -95,7 +95,6 @@ app.use(
 app.use(
   "/api/question_history",
   authMiddleware,
-  roleMiddleware(["2", "3"]),
   createProxyMiddleware({
     target: USER_SERVICE_URL,
     changeOrigin: true,
