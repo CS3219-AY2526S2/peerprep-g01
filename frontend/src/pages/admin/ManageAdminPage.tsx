@@ -52,6 +52,7 @@ function ManageAdminPage() {
   } = useAdmins();
 
   const currentUser = useAuthStore((s) => s.user);
+  const isSuperAdmin = currentUser?.role === "3";
 
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
@@ -104,7 +105,9 @@ function ManageAdminPage() {
       <AdminTable
         tableButtons={[
           <SearchBar submitHandler={handleSearchSubmit} />,
-          <AdminTableAddButton label={"Add Admin"} onClick={handleOpenAdd} />,
+          ...(isSuperAdmin
+            ? [<AdminTableAddButton label={"Add Admin"} onClick={handleOpenAdd} />]
+            : []),
         ]}
         tableFields={tableFields}
         rows={admins}
@@ -120,7 +123,8 @@ function ManageAdminPage() {
               {new Date(admin.createdAt).toLocaleDateString()}
             </TableCell>
             <TableCell align="right">
-              {currentUser?.userId === admin.userId ? null : deletingUserId ===
+              {!isSuperAdmin ||
+              currentUser?.userId === admin.userId ? null : deletingUserId ===
                 admin.userId ? (
                 <CircularProgress size={20} />
               ) : (
