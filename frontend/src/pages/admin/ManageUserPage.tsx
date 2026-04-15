@@ -39,6 +39,8 @@ function ManageUserPage() {
     error,
     loadUsers,
     cursorOffset,
+    hasMore,
+    loadNextUsers,
     deleteUser,
     deletingUserId,
     searchUsers,
@@ -111,6 +113,11 @@ function ManageUserPage() {
         rows={users}
         isLoading={isLoading}
         error={error}
+        pagination={{
+          canPrev: false,
+          canNext: hasMore,
+          onNext: loadNextUsers,
+        }}
         renderRow={(user, index) => (
           <TableRow key={user.userId} hover sx={{ width: "100%" }}>
             <TableCell>{cursorOffset + index + 1}</TableCell>

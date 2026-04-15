@@ -46,6 +46,9 @@ function ManageQuestionPage() {
     editQuestion,
     deletingQuestionId,
     page,
+    totalPages,
+    loadNextPage,
+    loadPrevPage,
   } = useQuestion();
 
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
@@ -136,6 +139,14 @@ function ManageQuestionPage() {
         rows={questions}
         isLoading={isLoading}
         error={error}
+        pagination={{
+          page,
+          totalPages,
+          canPrev: page > 1,
+          canNext: page < totalPages,
+          onPrev: loadPrevPage,
+          onNext: loadNextPage,
+        }}
         renderRow={(question, index) => (
           <TableRow key={question.questionId} hover sx={{ width: "100%" }}>
             <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
