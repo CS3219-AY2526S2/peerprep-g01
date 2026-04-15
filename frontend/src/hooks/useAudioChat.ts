@@ -36,6 +36,7 @@ export default function useAudioChat({
   const localStreamRef = useRef<MediaStream | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const partnerReadyRef = useRef(false);
+  const iceCandidateBuffer = useRef<RTCIceCandidateInit[]>([]);
 
   const createPeerConnection = useCallback(() => {
     if (!socket || !localStreamRef.current) return null;
@@ -100,6 +101,7 @@ export default function useAudioChat({
       remoteAudioRef.current.srcObject = null;
     }
     partnerReadyRef.current = false;
+    iceCandidateBuffer.current = [];
     setMicOn(false);
     setPartnerMicOn(false);
     setAudioConnected(false);
@@ -159,14 +161,18 @@ export default function useAudioChat({
     const onAudioOffer = async (data: { offer: RTCSessionDescriptionInit }) => {
       console.log("[audio] received offer, creating answer");
 
-      // Ensure we have a stream before creating the peer connection
+      // Ensure we have a stream before creating the peer connection.
+      // Start the track disabled so the receiver isn't silently transmitting —
+      // they must click unmute to actually send audio.
       if (!localStreamRef.current) {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({
             audio: true,
           });
+          stream.getAudioTracks().forEach((track) => {
+            track.enabled = false;
+          });
           localStreamRef.current = stream;
-          setMicOn(true);
         } catch (err) {
           console.error("[audio] mic access denied on offer receive:", err);
           return;
@@ -181,6 +187,22 @@ export default function useAudioChat({
       await pc.setLocalDescription(answer);
       socket.emit("audio-answer", { answer });
       console.log("[audio] answer emitted");
+
+      if (iceCandidateBuffer.current.length > 0) {
+        console.log(
+          "[audio] flushing",
+          iceCandidateBuffer.current.length,
+          "buffered ICE candidates",
+        );
+        for (const candidate of iceCandidateBuffer.current) {
+          try {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } catch (err) {
+            console.error("[audio] failed to add buffered ICE candidate:", err);
+          }
+        }
+        iceCandidateBuffer.current = [];
+      }
     };
 
     const onAudioAnswer = async (data: {
@@ -194,7 +216,11 @@ export default function useAudioChat({
     };
 
     const onIceCandidate = async (data: { candidate: RTCIceCandidateInit }) => {
-      if (!peerConnectionRef.current) return;
+      if (!peerConnectionRef.current) {
+        console.log("[audio] buffering ICE candidate (no peer connection yet)");
+        iceCandidateBuffer.current.push(data.candidate);
+        return;
+      }
       await peerConnectionRef.current.addIceCandidate(
         new RTCIceCandidate(data.candidate),
       );
