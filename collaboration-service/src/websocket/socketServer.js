@@ -1,5 +1,6 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
+const cookie = require("cookie");
 const {
   getRoom,
   addUser,
@@ -23,9 +24,11 @@ function initSocketServer(server) {
     },
   });
 
-  // Verify JWT before allowing connection
+  // Verify JWT (from auth_token cookie) before allowing connection
   io.use((socket, next) => {
-    const token = socket.handshake.auth.token;
+    const rawCookie = socket.handshake.headers.cookie || "";
+    const parsed = cookie.parse(rawCookie);
+    const token = parsed.auth_token;
     if (!token) return next(new Error("Unauthorized: no token"));
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);

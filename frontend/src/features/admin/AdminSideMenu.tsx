@@ -30,8 +30,8 @@ function AdminSideMenu() {
   const { logout } = useAuth();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     navigate("/login");
   }
 

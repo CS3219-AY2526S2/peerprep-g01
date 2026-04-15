@@ -16,14 +16,14 @@ import useAuthStore from "../store/authStore";
 import CollabPage from "../pages/CollabPage";
 
 function UserLayout() {
-  const token = useAuthStore.getState().token;
-  if (!token) return <Navigate to="/login" replace />;
+  const user = useAuthStore.getState().user;
+  if (!user) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
 function AdminLayout() {
-  const token = useAuthStore.getState().token;
-  if (!token) return <Navigate to="/login" replace />;
+  const user = useAuthStore.getState().user;
+  if (!user) return <Navigate to="/login" replace />;
   return <Outlet />;
 }
 
