@@ -1,12 +1,19 @@
 import { useState } from "react";
 import useAuth from "../../hooks/useAuth";
-import { Typography, Stack, Box, TextField, Button } from "@mui/material";
+import {
+  Typography,
+  Stack,
+  Box,
+  TextField,
+  Button,
+  Alert,
+} from "@mui/material";
 import { Link } from "react-router-dom";
 
 function LoginForm() {
   const [email, setUserEmail] = useState("");
   const [password, setUserPassword] = useState("");
-  const { login, isLoading } = useAuth();
+  const { login, error, isLoading } = useAuth();
 
   async function handleSubmit(e: React.SubmitEvent) {
     e.preventDefault();
@@ -35,6 +42,7 @@ function LoginForm() {
               margin: "1.3rem 0",
             }}
           >
+            {error && <Alert severity="error">{error}</Alert>}
             <TextField
               label="email@domain.com"
               name="email"
