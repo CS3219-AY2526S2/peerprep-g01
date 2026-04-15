@@ -29,7 +29,7 @@ function ManageUserPage() {
     "UserName",
     "Email",
     "JoinedDate",
-    "AttempyHistory",
+    "Attempt History",
     "",
   ];
 

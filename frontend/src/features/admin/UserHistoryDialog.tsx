@@ -165,23 +165,21 @@ function UserHistoryDialog({
         </Typography>
       </DialogTitle>
       <DialogContent dividers sx={{ p: 0 }}>
-        <Box sx={{ overflowX: "auto" }}>
-          <TableContainer>
-            <Table size="small">
+        <TableContainer sx={{ maxHeight: "60vh" }}>
+          <Table size="small" stickyHeader>
               <TableHead>
-                <TableRow sx={{ bgcolor: "grey.50" }}>
-                  <TableCell sx={{ fontWeight: 500 }}>#</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>Question</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>Topic</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>Difficulty</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 500 }}>Date</TableCell>
+                <TableRow>
+                  <TableCell sx={{ fontWeight: 500, bgcolor: "grey.50" }}>#</TableCell>
+                  <TableCell sx={{ fontWeight: 500, bgcolor: "grey.50" }}>Question</TableCell>
+                  <TableCell sx={{ fontWeight: 500, bgcolor: "grey.50" }}>Topic</TableCell>
+                  <TableCell sx={{ fontWeight: 500, bgcolor: "grey.50" }}>Difficulty</TableCell>
+                  <TableCell sx={{ fontWeight: 500, bgcolor: "grey.50" }}>Status</TableCell>
+                  <TableCell sx={{ fontWeight: 500, bgcolor: "grey.50" }}>Date</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>{renderBody()}</TableBody>
-            </Table>
-          </TableContainer>
-        </Box>
+          </Table>
+        </TableContainer>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
