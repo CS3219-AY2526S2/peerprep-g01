@@ -283,6 +283,20 @@ function UserHomePage() {
                             {d.Subtitle}
                           </Typography>
 
+                          {isDisabled && (
+                            <Typography
+                              variant="caption"
+                              color="text.disabled"
+                              sx={{
+                                display: "block",
+                                mt: 0.5,
+                                fontStyle: "italic",
+                              }}
+                            >
+                              No questions available
+                            </Typography>
+                          )}
+
                           {/* Per-topic availability breakdown (multi-topic only) */}
                           {showBreakdown && (
                             <Box
@@ -306,8 +320,16 @@ function UserHomePage() {
                                     sx={{
                                       fontSize: 10,
                                       height: 18,
-                                      bgcolor: has ? "#e8f5e9" : "#fdecea",
-                                      color: has ? "#2e7d32" : "#c62828",
+                                      bgcolor: has
+                                        ? "#e8f5e9"
+                                        : isDisabled
+                                          ? "#eeeeee"
+                                          : "#fdecea",
+                                      color: has
+                                        ? "#2e7d32"
+                                        : isDisabled
+                                          ? "#9e9e9e"
+                                          : "#c62828",
                                       border: "none",
                                     }}
                                   />
