@@ -1,8 +1,8 @@
-const db = require('../config/db');
-const { getRoom, deleteRoom } = require('../websocket/roomManager');
-const { flushDocPersist } = require('./docPersistService');
+const db = require("../config/db");
+const { getRoom, deleteRoom } = require("../websocket/roomManager");
+const { flushDocPersist } = require("./docPersistService");
 
-const USER_SERVICE_URL = process.env.USER_SERVICE_URL || 'http://user-app:3001';
+const USER_SERVICE_URL = process.env.USER_SERVICE_URL || "http://user-app:3001";
 const SERVICE_SECRET = process.env.SERVICE_SECRET;
 
 /**
@@ -13,7 +13,10 @@ async function endSession(roomId) {
   const room = getRoom(roomId);
   if (!room) return;
 
-  const { sessionId, questionId, userOneId, userTwoId, yjsDoc } = room;
+  const { sessionId, questionId, users, userOneId, userTwoId, yjsDoc } = room;
+
+  const userOneStatus = users.get(userOneId)?.markAsDone || "attempted";
+  const userTwoStatus = users.get(userTwoId)?.markAsDone || "attempted";
 
   // 1. Flush final doc state to DB
   if (yjsDoc) {
@@ -25,16 +28,19 @@ async function endSession(roomId) {
   try {
     await db.query(
       `UPDATE "session" SET "status" = $1, "endedAt" = $2 WHERE "roomId" = $3`,
-      ['completed', now, roomId]
+      ["completed", now, roomId],
     );
   } catch (err) {
-    console.error(`[sessionService] Failed to update session status for room ${roomId}:`, err.message);
+    console.error(
+      `[sessionService] Failed to update session status for room ${roomId}:`,
+      err.message,
+    );
   }
 
   // 3. Write question history for both users
   await Promise.allSettled([
-    writeHistory(userOneId, questionId, userTwoId, now),
-    writeHistory(userTwoId, questionId, userOneId, now),
+    writeHistory(userOneId, questionId, userTwoId, now, userOneStatus),
+    writeHistory(userTwoId, questionId, userOneId, now, userTwoStatus),
   ]);
 
   // 4. Clean up in-memory room
@@ -49,47 +55,64 @@ const MAX_RETRIES = 2;
  * POST to User Service internal API to record a question history entry.
  * Retries on 5xx / network errors (up to 2 retries with 1s/2s backoff).
  */
-async function writeHistory(userId, questionId, partnerId, sessionEndAt) {
+async function writeHistory(
+  userId,
+  questionId,
+  partnerId,
+  sessionEndAt,
+  userDone,
+) {
   if (!SERVICE_SECRET) {
-    console.error('[sessionService] SERVICE_SECRET not set — skipping history write');
+    console.error(
+      "[sessionService] SERVICE_SECRET not set — skipping history write",
+    );
     return;
   }
 
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
-      const res = await fetch(`${USER_SERVICE_URL}/api/internal/question_history`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Service-Secret': SERVICE_SECRET,
+      const res = await fetch(
+        `${USER_SERVICE_URL}/api/internal/question_history`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-Service-Secret": SERVICE_SECRET,
+          },
+          body: JSON.stringify({
+            userId,
+            questionId,
+            attemptStatus: userDone,
+            partnerId,
+            sessionEndAt: sessionEndAt.toISOString(),
+          }),
         },
-        body: JSON.stringify({
-          userId,
-          questionId,
-          attemptStatus: 'completed',
-          partnerId,
-          sessionEndAt: sessionEndAt.toISOString(),
-        }),
-      });
+      );
 
       if (res.ok) return;
 
       // 4xx errors won't fix themselves — don't retry
       if (res.status >= 400 && res.status < 500) {
         const body = await res.text();
-        console.error(`[sessionService] History write failed for user ${userId}: ${res.status} ${body}`);
+        console.error(
+          `[sessionService] History write failed for user ${userId}: ${res.status} ${body}`,
+        );
         return;
       }
 
       // 5xx — retry
       if (attempt === MAX_RETRIES) {
         const body = await res.text();
-        console.error(`[sessionService] History write failed after ${MAX_RETRIES + 1} attempts for user ${userId}: ${res.status} ${body}`);
+        console.error(
+          `[sessionService] History write failed after ${MAX_RETRIES + 1} attempts for user ${userId}: ${res.status} ${body}`,
+        );
       }
     } catch (err) {
       // Network error — retry
       if (attempt === MAX_RETRIES) {
-        console.error(`[sessionService] History write failed after ${MAX_RETRIES + 1} attempts for user ${userId}: ${err.message}`);
+        console.error(
+          `[sessionService] History write failed after ${MAX_RETRIES + 1} attempts for user ${userId}: ${err.message}`,
+        );
       }
     }
 
