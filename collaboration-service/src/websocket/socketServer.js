@@ -1,6 +1,11 @@
 const { Server } = require("socket.io");
 const jwt = require("jsonwebtoken");
-const { getRoom, addUser, setUserStatus } = require("./roomManager");
+const {
+  getRoom,
+  addUser,
+  setUserStatus,
+  setUserDoneStatus,
+} = require("./roomManager");
 const { setupYjs } = require("./yjsHandler");
 const { setupAudioHandler, getPartnerSocketId } = require("./audioHandler");
 const { endSession } = require("../services/sessionService");
@@ -78,15 +83,21 @@ function initSocketServer(server) {
     socket.to(roomId).emit("partner_joined", { userId });
 
     // User explicitly leaves the session
-    socket.on("leave_session", () => {
+    socket.on("leave_session", (data) => {
       const r = getRoom(roomId);
+      const isDone = data?.markAsDone;
+      const statusString = isDone ? "completed" : "attempted";
+
       if (r) {
         const partnerSid = getPartnerSocketId(r, userId);
         if (partnerSid)
           io.to(partnerSid).emit("partner-audio-stopped", { userId });
       }
+
+      setUserDoneStatus(roomId, userId, statusString);
       setUserStatus(roomId, userId, "left");
       socket.to(roomId).emit("partner_left", { userId });
+
       checkBothLeft(io, roomId);
       socket.leave(roomId);
     });
