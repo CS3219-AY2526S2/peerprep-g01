@@ -99,9 +99,16 @@ exports.login = async (req, res) => {
             { expiresIn: '24h' }
         );
 
+        res.cookie('auth_token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 24 * 60 * 60 * 1000,
+            path: '/',
+        });
+
         return res.status(200).json({
             message: 'Login successful.',
-            token,
             user: {
                 userId: user.userId,
                 userName: user.userName,
@@ -123,6 +130,12 @@ exports.login = async (req, res) => {
  * blacklisting or cookie clearing).
  */
 exports.logout = async (_req, res) => {
+    res.clearCookie('auth_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        path: '/',
+    });
     return res.status(200).json({ message: 'Logged out successfully.' });
 };
 

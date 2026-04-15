@@ -3,6 +3,8 @@ import useAuthStore from "../store/authStore";
 import { loginUser, registerUser } from "../services/userService";
 import { useNavigate } from "react-router-dom";
 
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 function useAuth() {
   const { setUser, clearUser } = useAuthStore();
   const [error, setError] = useState<string | null>(null);
@@ -13,8 +15,8 @@ function useAuth() {
     setIsLoading(true);
     setError(null);
     try {
-      const { user, token } = await loginUser(email, password);
-      setUser(user, token);
+      const { user } = await loginUser(email, password);
+      setUser(user);
       if (user.role === "1") {
         navigate("/home");
       } else {
@@ -48,7 +50,15 @@ function useAuth() {
     }
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await fetch(`${BASE_URL}/api/auth/logout`, {
+        method: "POST",
+        credentials: "include",
+      });
+    } catch {
+      // Even if the network call fails, clear local state so the UI logs out.
+    }
     clearUser();
   }
 
