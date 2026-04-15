@@ -19,10 +19,3 @@ export async function fetchRooms(): Promise<Room[]> {
   const json = await res.json();
   return json.data || [];
 }
-
-export async function terminateRoom(roomId: string): Promise<void> {
-  const res = await apiFetch(`${BASE_URL}/api/collab/rooms/${roomId}`, {
-    method: "DELETE",
-  });
-  if (!res.ok) throw new Error(`Terminate failed (${res.status})`);
-}
