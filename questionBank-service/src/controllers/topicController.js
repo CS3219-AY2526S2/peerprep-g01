@@ -7,7 +7,12 @@ const db = require('../config/db');
  */
 exports.getAllTopics = async (req, res) => {
   try {
-    const result = await db.query('SELECT "topicId", "topicName" FROM "topic" ORDER BY "topicId" ASC');
+    const result = await db.query(
+      `SELECT DISTINCT t."topicId", t."topicName"
+       FROM "topic" t
+       INNER JOIN "question_bank" q ON t."topicId" = q."topicId"
+       ORDER BY t."topicId" ASC`
+    );
     res.status(200).json({
       data: result.rows
     });
