@@ -6,6 +6,8 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
+  FormControlLabel,
+  Checkbox,
 } from "@mui/material";
 
 interface ConfirmDialogProps {
@@ -19,6 +21,9 @@ interface ConfirmDialogProps {
   errorMessage?: string | null;
   onConfirm: () => void;
   onCancel: () => void;
+  showCompletionOption?: boolean;
+  isCompleted?: boolean;
+  onCompletionChange?: (checked: boolean) => void;
 }
 
 function ConfirmDialog({
@@ -30,6 +35,9 @@ function ConfirmDialog({
   cancelLabel = "Cancel",
   confirmColor = "primary",
   errorMessage,
+  showCompletionOption = false,
+  isCompleted = false,
+  onCompletionChange,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -38,6 +46,19 @@ function ConfirmDialog({
       <DialogTitle>{title}</DialogTitle>
       <DialogContent>
         <DialogContentText>{description}</DialogContentText>
+        {showCompletionOption && (
+          <FormControlLabel
+            control={
+              <Checkbox
+                checked={isCompleted}
+                onChange={(e) => onCompletionChange?.(e.target.checked)}
+              />
+            }
+            label="Mark this question as completed"
+            sx={{ mt: 2 }}
+          />
+        )}
+
         {errorMessage && (
           <Alert severity="error" sx={{ mt: 2 }}>
             {errorMessage}

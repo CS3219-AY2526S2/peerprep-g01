@@ -1,5 +1,8 @@
 const db = require("../config/db");
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 exports.getAllQuestions = async (req, res) => {
   try {
     let {
@@ -85,6 +88,13 @@ exports.getQuestionById = async (req, res) => {
 
   if (!questionId) {
     return res.status(400).json({ error: "questionId is required" });
+  }
+
+  // Legacy history rows may reference non-UUID ids (e.g. "q-pair", "Q-0001")
+  // from an older schema. Treat them as "not found" rather than letting
+  // Postgres throw invalid-uuid-syntax and surfacing a 500 to the caller.
+  if (!UUID_REGEX.test(questionId)) {
+    return res.status(404).json({ error: "Question not found" });
   }
 
   try {

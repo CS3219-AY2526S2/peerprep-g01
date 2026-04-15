@@ -35,6 +35,8 @@ function CollabPage() {
     socket,
     roomId,
     isUserOne,
+    isCompleted,
+    setIsCompleted,
   } = useCollabSession();
 
   const myUserId = useAuthStore((s) => s.user?.userId ?? "");
@@ -214,7 +216,10 @@ function CollabPage() {
         description="Are you sure you want to leave? Your partner will be notified."
         confirmLabel="Leave"
         confirmColor="warning"
-        onConfirm={handleLeave}
+        showCompletionOption={true}
+        isCompleted={isCompleted}
+        onCompletionChange={setIsCompleted}
+        onConfirm={() => handleLeave(isCompleted)}
         onCancel={() => setLeaveDialogOpen(false)}
       />
 

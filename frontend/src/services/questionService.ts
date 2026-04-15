@@ -155,6 +155,23 @@ async function fetchTopics(): Promise<{
   return response.json();
 }
 
+async function fetchTopicsWithDifficulty(): Promise<{
+  data: { topicId: string; topicName: string; difficulties: string[] }[];
+}> {
+  const response = await apiFetch(`${BASE_URL}/api/questions/topic/difficulty`);
+  if (!response.ok) {
+    let message = "Fetch topics request failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+  return response.json();
+}
+
 export {
   fetchQuestions,
   fetchQuestionById,
@@ -162,4 +179,5 @@ export {
   updateQuestion,
   addQuestion,
   fetchTopics,
+  fetchTopicsWithDifficulty,
 };

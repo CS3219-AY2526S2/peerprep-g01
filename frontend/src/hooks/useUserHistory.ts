@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { fetchUserById } from "../services/userService";
 import { fetchQuestionById } from "../services/questionService";
+import { fetchMyQuestionHistory } from "../services/questionHistoryService";
+import useAuthStore from "../store/authStore";
 
 export interface HistoryEntry {
   historyId: number;
@@ -14,6 +16,11 @@ export interface HistoryEntry {
   difficulty: "Easy" | "Medium" | "Hard" | null;
 }
 
+type RawHistoryRow = Omit<
+  HistoryEntry,
+  "questionName" | "topicName" | "difficulty"
+>;
+
 function useUserHistory() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -25,11 +32,20 @@ function useUserHistory() {
     setHistory([]);
 
     try {
-      const { data: user } = await fetchUserById(userId);
-      const rawHistory: Omit<
-        HistoryEntry,
-        "questionName" | "topicName" | "difficulty"
-      >[] = user.questionHistory ?? [];
+      const authUserId = useAuthStore.getState().user?.userId;
+      let rawHistory: RawHistoryRow[];
+
+      if (userId === authUserId) {
+        // Self-view: hit the user-accessible /api/question_history endpoint
+        // directly so regular users (role '1') aren't blocked by the admin
+        // gate on /api/users/:id.
+        rawHistory = await fetchMyQuestionHistory();
+      } else {
+        // Admin viewing another user: the /api/users/:id path is admin-gated
+        // and embeds questionHistory in the user object.
+        const { data: user } = await fetchUserById(userId);
+        rawHistory = user.questionHistory ?? [];
+      }
 
       if (rawHistory.length === 0) {
         setHistory([]);

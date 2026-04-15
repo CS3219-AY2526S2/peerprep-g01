@@ -1,7 +1,7 @@
 // In-memory store for active collaboration rooms.
 // Keyed by roomId. Populated on session creation, cleaned up on session end.
 
-const Y = require('yjs');
+const Y = require("yjs");
 const rooms = new Map();
 
 /**
@@ -57,8 +57,9 @@ function addUser(roomId, userId, socketId) {
   if (!room) return;
   room.users.set(userId, {
     socketId,
-    status: 'connected',
+    status: "connected",
     disconnectedAt: null,
+    markAsDone: "attempted",
   });
 }
 
@@ -92,9 +93,20 @@ function getConnectedCount(roomId) {
   if (!room) return 0;
   let count = 0;
   for (const u of room.users.values()) {
-    if (u.status === 'connected') count++;
+    if (u.status === "connected") count++;
   }
   return count;
+}
+
+/**
+ * Set a user's completion preference.
+ */
+function setUserDoneStatus(roomId, userId, isDone) {
+  const room = rooms.get(roomId);
+  if (!room) return;
+  const user = room.users.get(userId);
+  if (!user) return;
+  user.markAsDone = isDone;
 }
 
 module.exports = {
@@ -107,4 +119,5 @@ module.exports = {
   removeUser,
   setUserStatus,
   getConnectedCount,
+  setUserDoneStatus,
 };

@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import useAuthStore from "../store/authStore";
 import type User from "../types/user";
-import type Topic from "../types/topic";
-import { fetchTopics } from "../services/questionService";
+import { fetchTopicsWithDifficulty } from "../services/questionService";
 import {
   joinMatchQueue as joinMatchQueueRequest,
   leaveMatchQueue as leaveMatchQueueRequest,
@@ -10,6 +9,12 @@ import {
 import { useNavigate } from "react-router-dom";
 
 type MatchState = "idle" | "waiting" | "matched" | "timeout";
+
+export interface TopicWithDifficulty {
+  topicId: string;
+  topicName: string;
+  difficulties: string[];
+}
 
 export interface MatchQuestion {
   questionId: string;
@@ -35,12 +40,13 @@ export interface MatchResult {
 
 export interface UseMatchReturn {
   user: User | null;
-  topics: Topic[];
+  topics: TopicWithDifficulty[];
+  topicDifficulties: Map<string, string[]>;
   topicLoading: boolean;
   topicError: boolean;
   retryTopics: () => void;
-  selectedTopics: Topic[];
-  toggleTopic: (topic: Topic) => void;
+  selectedTopics: TopicWithDifficulty[];
+  toggleTopic: (topic: TopicWithDifficulty) => void;
   selectedDifficulty: string | null;
   setSelectedDifficulty: (difficulty: string | null) => void;
   matchState: MatchState;
@@ -51,28 +57,30 @@ export interface UseMatchReturn {
   handleEnterRoom: () => void;
 }
 
-const MATCH_TIMEOUT_MS = 30 * 1000; // must match backend MATCH_TIMEOUT in matchingQueue.js
+const MATCH_TIMEOUT_MS = 30 * 1000;
 
 function useMatch(): UseMatchReturn {
   const { user } = useAuthStore();
   const navigate = useNavigate();
 
-  const [topics, setTopics] = useState<Topic[]>([]);
+  const [topics, setTopics] = useState<TopicWithDifficulty[]>([]);
   const [topicLoading, setTopicsLoading] = useState(true);
   const [topicError, setTopicError] = useState(false);
-  const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
+  const [selectedTopics, setSelectedTopics] = useState<TopicWithDifficulty[]>(
+    [],
+  );
 
-  function toggleTopic(topic: Topic) {
+  function toggleTopic(topic: TopicWithDifficulty) {
     setSelectedTopics((prev) =>
       prev.some((t) => t.topicId === topic.topicId)
         ? prev.filter((t) => t.topicId !== topic.topicId)
         : [...prev, topic],
     );
   }
+
   const [selectedDifficulty, setSelectedDifficulty] = useState<string | null>(
     "Easy",
   );
-
   const [matchState, setMatchState] = useState<MatchState>("idle");
   const [matchResult, setMatchResult] = useState<MatchResult | null>(null);
   const [elapsed, setElapsed] = useState(0);
@@ -80,13 +88,19 @@ function useMatch(): UseMatchReturn {
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Refs to always have latest values available in the unmount cleanup
   const matchStateRef = useRef(matchState);
   const selectedTopicsRef = useRef(selectedTopics);
   const selectedDifficultyRef = useRef(selectedDifficulty);
-  useEffect(() => { matchStateRef.current = matchState; }, [matchState]);
-  useEffect(() => { selectedTopicsRef.current = selectedTopics; }, [selectedTopics]);
-  useEffect(() => { selectedDifficultyRef.current = selectedDifficulty; }, [selectedDifficulty]);
+
+  useEffect(() => {
+    matchStateRef.current = matchState;
+  }, [matchState]);
+  useEffect(() => {
+    selectedTopicsRef.current = selectedTopics;
+  }, [selectedTopics]);
+  useEffect(() => {
+    selectedDifficultyRef.current = selectedDifficulty;
+  }, [selectedDifficulty]);
 
   function stopTimeout() {
     if (timeoutRef.current) {
@@ -94,42 +108,33 @@ function useMatch(): UseMatchReturn {
       timeoutRef.current = null;
     }
   }
-
   function stopTimer() {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
   }
-
   function startTimer() {
     setElapsed(0);
-    timerRef.current = setInterval(() => {
-      setElapsed((prev) => prev + 1);
-    }, 1000);
+    timerRef.current = setInterval(() => setElapsed((prev) => prev + 1), 1000);
   }
 
   function loadTopics() {
     setTopicsLoading(true);
     setTopicError(false);
-    fetchTopics()
-      .then((res) => {
-        const { data } = res;
-        setTopics(data);
-      })
+    fetchTopicsWithDifficulty()
+      .then(({ data }) => setTopics(data))
       .catch((err) => {
-        console.error("fetchTopics failed:", err);
+        console.error("fetchTopicsWithDifficulty failed:", err);
         setTopicError(true);
       })
       .finally(() => setTopicsLoading(false));
   }
 
-  // fetch topics on mount
   useEffect(() => {
     loadTopics();
   }, []);
 
-  // clean up on unmount
   useEffect(() => {
     return () => {
       stopTimer();
@@ -146,6 +151,15 @@ function useMatch(): UseMatchReturn {
       }
     };
   }, []);
+
+  // Auto-clear selectedDifficulty if it becomes unavailable after topic selection changes
+  useEffect(() => {
+    if (!selectedDifficulty || selectedTopics.length === 0) return;
+    const stillAvailable = selectedTopics.some((t) =>
+      t.difficulties.includes(selectedDifficulty),
+    );
+    if (!stillAvailable) setSelectedDifficulty(null);
+  }, [selectedTopics, selectedDifficulty]);
 
   async function handleMatchRequest() {
     if (selectedTopics.length === 0 || !selectedDifficulty) return;
@@ -194,7 +208,6 @@ function useMatch(): UseMatchReturn {
     stopTimeout();
     setElapsed(0);
     setMatchState("idle");
-
     if (selectedTopics.length === 0 || !selectedDifficulty) return;
     try {
       await leaveMatchQueueRequest(
@@ -213,11 +226,16 @@ function useMatch(): UseMatchReturn {
     });
   }
 
+  const topicDifficulties = new Map(
+    topics.map((t) => [t.topicId, t.difficulties]),
+  );
+
   return {
     user,
     selectedTopics,
     toggleTopic,
     topics,
+    topicDifficulties,
     topicLoading,
     topicError,
     retryTopics: loadTopics,
