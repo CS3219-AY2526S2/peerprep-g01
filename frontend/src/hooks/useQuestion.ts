@@ -19,11 +19,11 @@ function useQuestion() {
     null,
   );
 
-  async function loadQuestions() {
+  async function loadQuestions(targetPage: number = 1) {
     setIsLoading(true);
     setError(null);
     try {
-      const { data, pagination } = await fetchQuestions();
+      const { data, pagination } = await fetchQuestions({ page: targetPage });
       setQuestions(data);
       setPage(pagination.currentPage);
       setTotalPages(pagination.totalPages);
@@ -38,11 +38,19 @@ function useQuestion() {
     }
   }
 
+  function loadNextPage() {
+    if (page < totalPages) loadQuestions(page + 1);
+  }
+
+  function loadPrevPage() {
+    if (page > 1) loadQuestions(page - 1);
+  }
+
   async function deleteQuestion(questionId: string) {
     setDeletingQuestionId(questionId);
     try {
       await deleteQuestionRequest(questionId);
-      await loadQuestions();
+      await loadQuestions(page);
     } finally {
       setDeletingQuestionId(null);
     }
@@ -57,7 +65,7 @@ function useQuestion() {
     setIsAdding(true);
     try {
       await addQuestionRequest(question);
-      await loadQuestions();
+      await loadQuestions(page);
     } finally {
       setIsAdding(false);
     }
@@ -72,7 +80,7 @@ function useQuestion() {
     setIsEditing(true);
     try {
       await editQuestionRequest(question);
-      await loadQuestions();
+      await loadQuestions(page);
     } finally {
       setIsEditing(false);
     }
@@ -88,6 +96,8 @@ function useQuestion() {
     totalPages,
     deletingQuestionId,
     loadQuestions,
+    loadNextPage,
+    loadPrevPage,
     deleteQuestion,
     addQuestion,
     editQuestion,

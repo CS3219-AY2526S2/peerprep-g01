@@ -8,8 +8,20 @@ import {
   TableBody,
   CircularProgress,
   Typography,
+  IconButton,
 } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import React from "react";
+
+export interface AdminTablePagination {
+  page?: number;
+  totalPages?: number;
+  canPrev: boolean;
+  canNext: boolean;
+  onPrev?: () => void;
+  onNext: () => void;
+}
 
 interface AdminTableProps<T> {
   tableButtons?: React.ReactNode[];
@@ -18,6 +30,7 @@ interface AdminTableProps<T> {
   isLoading?: boolean;
   error?: string | null;
   renderRow: (item: T, index: number) => React.ReactNode;
+  pagination?: AdminTablePagination;
 }
 
 function AdminTable<T>({
@@ -27,6 +40,7 @@ function AdminTable<T>({
   isLoading = false,
   error = null,
   renderRow,
+  pagination,
 }: AdminTableProps<T>) {
   const renderBody = () => {
     if (isLoading) {
@@ -130,6 +144,43 @@ function AdminTable<T>({
             <TableBody>{renderBody()}</TableBody>
           </Table>
         </TableContainer>
+        {pagination && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: 1,
+              px: 2,
+              py: 1,
+              borderTop: "1px solid",
+              borderColor: "grey.200",
+            }}
+          >
+            {pagination.page !== undefined &&
+              pagination.totalPages !== undefined && (
+                <Typography variant="body2" color="textSecondary">
+                  Page {pagination.page} of {pagination.totalPages}
+                </Typography>
+              )}
+            <IconButton
+              size="small"
+              disabled={!pagination.canPrev}
+              onClick={pagination.onPrev}
+              aria-label="Previous page"
+            >
+              <ChevronLeftIcon fontSize="small" />
+            </IconButton>
+            <IconButton
+              size="small"
+              disabled={!pagination.canNext}
+              onClick={pagination.onNext}
+              aria-label="Next page"
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </Box>
+        )}
       </Box>
     </Box>
   );

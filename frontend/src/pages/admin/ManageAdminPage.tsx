@@ -45,6 +45,9 @@ function ManageAdminPage() {
     error,
     loadAdmins,
     page,
+    totalPages,
+    loadNextPage,
+    loadPrevPage,
     createAdmin,
     deleteAdmin,
     deletingUserId,
@@ -125,6 +128,14 @@ function ManageAdminPage() {
         rows={admins}
         isLoading={isLoading}
         error={error}
+        pagination={{
+          page,
+          totalPages,
+          canPrev: page > 1,
+          canNext: page < totalPages,
+          onPrev: loadPrevPage,
+          onNext: loadNextPage,
+        }}
         renderRow={(admin, index) => (
           <TableRow key={admin.userId} hover sx={{ width: "100%" }}>
             <TableCell>{(page - 1) * 10 + index + 1}</TableCell>
