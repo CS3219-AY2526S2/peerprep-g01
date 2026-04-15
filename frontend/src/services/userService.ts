@@ -64,6 +64,23 @@ async function fetchUsers(params: fetchUserParams = {}) {
   return response.json();
 }
 
+async function fetchUserById(userId: string) {
+  const response = await apiFetch(`${BASE_URL}/api/users/${userId}`);
+
+  if (!response.ok) {
+    let message = "Fetch user failed";
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
 async function deleteUser(userId: string) {
   const response = await apiFetch(`${BASE_URL}/api/users/${userId}`, {
     method: "DELETE",
@@ -123,4 +140,11 @@ async function registerUser(userName: string, email: string, password: string) {
   return response.json();
 }
 
-export { loginUser, fetchUsers, deleteUser, searchUser, registerUser };
+export {
+  loginUser,
+  fetchUsers,
+  fetchUserById,
+  deleteUser,
+  searchUser,
+  registerUser,
+};

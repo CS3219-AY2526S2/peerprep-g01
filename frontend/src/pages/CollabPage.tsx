@@ -51,9 +51,18 @@ function CollabPage() {
     if (prevStatus.current === partnerStatus) return;
     prevStatus.current = partnerStatus;
 
-    const messages: Record<string, { message: string; severity: "success" | "warning" | "info" }> = {
-      connected: { message: "Your partner has joined the session", severity: "success" },
-      disconnected: { message: "Your partner disconnected", severity: "warning" },
+    const messages: Record<
+      string,
+      { message: string; severity: "success" | "warning" | "info" }
+    > = {
+      connected: {
+        message: "Your partner has joined the session",
+        severity: "success",
+      },
+      disconnected: {
+        message: "Your partner disconnected",
+        severity: "warning",
+      },
       left: { message: "Your partner left the session", severity: "info" },
     };
 
@@ -72,7 +81,7 @@ function CollabPage() {
         bgcolor: "#f5f5f5",
       }}
     >
-      <PageHeader />
+      <PageHeader isAdmin={false} />
 
       <Box
         sx={{
