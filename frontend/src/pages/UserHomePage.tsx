@@ -77,6 +77,7 @@ function UserHomePage() {
   const {
     user,
     topics,
+    topicDifficulties,
     topicLoading,
     topicError,
     retryTopics,
@@ -212,6 +213,7 @@ function UserHomePage() {
                     })}
                   </Grid>
                 )}
+
                 {/* Difficulty Picker*/}
                 <Typography
                   variant="caption"
@@ -223,36 +225,102 @@ function UserHomePage() {
                 <Grid container spacing={1.5} sx={{ mb: 3 }}>
                   {DIFFICULTIES.map((d) => {
                     const selected = selectedDifficulty === d.label;
+
+                    // Which selected topics support this difficulty
+                    const supportingTopics =
+                      selectedTopics.length > 0
+                        ? selectedTopics.filter((t) =>
+                            (topicDifficulties.get(t.topicId) ?? []).includes(
+                              d.label,
+                            ),
+                          )
+                        : null; // null = no topics chosen, don't filter
+
+                    const isDisabled =
+                      supportingTopics !== null &&
+                      supportingTopics.length === 0;
+
+                    const showBreakdown =
+                      selectedTopics.length > 1 && supportingTopics !== null;
+
                     return (
                       <Grid key={d.label} size={{ xs: 12, sm: 4 }}>
                         <Box
-                          onClick={() => setSelectedDifficulty(d.label)}
+                          onClick={() =>
+                            !isDisabled && setSelectedDifficulty(d.label)
+                          }
                           sx={{
                             border: selected
                               ? `2px solid ${d.colors}`
                               : "1px solid #e0e0e0",
-                            bgcolor: selected ? d.bg : "#ffffff",
+                            bgcolor: isDisabled
+                              ? "#f5f5f5"
+                              : selected
+                                ? d.bg
+                                : "#ffffff",
                             borderRadius: 2,
                             p: 1.5,
                             textAlign: "center",
-                            cursor: "pointer",
+                            cursor: isDisabled ? "not-allowed" : "pointer",
+                            opacity: isDisabled ? 0.45 : 1,
                             transition: "all 0.15s",
-                            "&:hover": { borderColor: d.colors },
+                            "&:hover": !isDisabled
+                              ? { borderColor: d.colors }
+                              : {},
                           }}
                         >
                           <Typography fontSize={24}>{d.emoji}</Typography>
-                          <Typography variant="body2" fontWeight={600}>
-                            {" "}
-                            {d.label}{" "}
+                          <Typography
+                            variant="body2"
+                            fontWeight={600}
+                            color={
+                              isDisabled ? "text.disabled" : "text.primary"
+                            }
+                          >
+                            {d.label}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
                             {d.Subtitle}
                           </Typography>
+
+                          {/* Per-topic availability breakdown (multi-topic only) */}
+                          {showBreakdown && (
+                            <Box
+                              sx={{
+                                mt: 0.75,
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 0.5,
+                                justifyContent: "center",
+                              }}
+                            >
+                              {selectedTopics.map((t) => {
+                                const has = (
+                                  topicDifficulties.get(t.topicId) ?? []
+                                ).includes(d.label);
+                                return (
+                                  <Chip
+                                    key={t.topicId}
+                                    label={t.topicName}
+                                    size="small"
+                                    sx={{
+                                      fontSize: 10,
+                                      height: 18,
+                                      bgcolor: has ? "#e8f5e9" : "#fdecea",
+                                      color: has ? "#2e7d32" : "#c62828",
+                                      border: "none",
+                                    }}
+                                  />
+                                );
+                              })}
+                            </Box>
+                          )}
                         </Box>
                       </Grid>
                     );
                   })}
                 </Grid>
+
                 {/* Selected Chips*/}
                 <Box
                   sx={{
