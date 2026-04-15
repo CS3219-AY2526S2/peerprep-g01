@@ -26,7 +26,16 @@ const DIFFICULTY_COLOR: Record<string, Color> = {
 };
 
 function ManageRoomPage() {
-  const { rooms, isLoading, error, handleSearch } = useRoom();
+  const {
+    rooms,
+    isLoading,
+    error,
+    handleSearch,
+    page,
+    totalPages,
+    loadNextPage,
+    loadPrevPage,
+  } = useRoom();
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
   function renderRow(room: Room) {
@@ -40,22 +49,30 @@ function ManageRoomPage() {
 
         <TableCell>
           <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>
-            {room.question.questionName}
+            {room.question?.questionName ?? "—"}
           </Typography>
         </TableCell>
 
         <TableCell>
-          <ChipAttribute label={room.question.topicName} color={grey} />
+          {room.question?.topicName ? (
+            <ChipAttribute label={room.question.topicName} color={grey} />
+          ) : (
+            "—"
+          )}
         </TableCell>
 
         <TableCell>
-          <ChipAttribute
-            label={
-              room.question.difficulty.charAt(0).toUpperCase() +
-              room.question.difficulty.slice(1)
-            }
-            color={DIFFICULTY_COLOR[room.question.difficulty] ?? grey}
-          />
+          {room.question?.difficulty ? (
+            <ChipAttribute
+              label={
+                room.question.difficulty.charAt(0).toUpperCase() +
+                room.question.difficulty.slice(1)
+              }
+              color={DIFFICULTY_COLOR[room.question.difficulty] ?? grey}
+            />
+          ) : (
+            "—"
+          )}
         </TableCell>
       </TableRow>
     );
@@ -77,6 +94,14 @@ function ManageRoomPage() {
         rows={rooms}
         isLoading={isLoading}
         error={error}
+        pagination={{
+          page,
+          totalPages,
+          canPrev: page > 1,
+          canNext: page < totalPages,
+          onPrev: loadPrevPage,
+          onNext: loadNextPage,
+        }}
         renderRow={renderRow}
       />
       <ViewRoomDialog
