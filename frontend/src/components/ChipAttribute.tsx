@@ -1,12 +1,6 @@
-import { Chip } from "@mui/material";
+import { Chip, type Color } from "@mui/material";
 
-function ChipAttribute({
-  label,
-  color,
-}: {
-  label: string;
-  color: Record<string | number, string>;
-}) {
+function ChipAttribute({ label, color }: { label: string; color: Color }) {
   return (
     <Chip
       variant="outlined"
