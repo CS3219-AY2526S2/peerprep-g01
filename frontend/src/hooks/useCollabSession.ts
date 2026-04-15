@@ -18,12 +18,14 @@ export interface UseCollabSessionReturn {
   language: string;
   setLanguage: (lang: string) => void;
   handleEditorMount: OnMount;
-  handleLeave: () => void;
   leaveDialogOpen: boolean;
   setLeaveDialogOpen: (status: boolean) => void;
   socket: Socket | null;
   roomId: string | undefined;
   isUserOne: boolean;
+  isCompleted: boolean;
+  setIsCompleted: (status: boolean) => void;
+  handleLeave: (markAsDone: boolean) => void;
 }
 
 function useCollabSession(): UseCollabSessionReturn {
@@ -44,6 +46,7 @@ function useCollabSession(): UseCollabSessionReturn {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [isUserOne, setIsUserOne] = useState(false);
 
+  const [isCompleted, setIsCompleted] = useState(false);
   const [leaveDialogOpen, setLeaveDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -119,8 +122,13 @@ function useCollabSession(): UseCollabSessionReturn {
     );
   };
 
-  function handleLeave() {
-    socketRef.current?.emit("leave_session");
+  function handleLeave(markAsDone: boolean) {
+    socketRef.current?.emit("leave_session", {
+      roomId,
+      markAsDone,
+    });
+
+    setLeaveDialogOpen(false);
     navigate("/home");
   }
 
@@ -136,6 +144,8 @@ function useCollabSession(): UseCollabSessionReturn {
     socket,
     roomId,
     isUserOne,
+    isCompleted,
+    setIsCompleted,
   };
 }
 
