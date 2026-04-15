@@ -16,8 +16,8 @@ function PageHeader({ isAdmin }: PageHeaderProps) {
   const navigate = useNavigate();
   const [logoutOpen, setLogoutOpen] = useState(false);
 
-  function handleLogout() {
-    logout();
+  async function handleLogout() {
+    await logout();
     navigate("/login");
   }
 

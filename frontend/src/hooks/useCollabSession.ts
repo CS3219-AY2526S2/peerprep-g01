@@ -1,6 +1,5 @@
 import { type OnMount } from "@monaco-editor/react";
 import { useNavigate, useParams } from "react-router-dom";
-import useAuthStore from "../store/authStore";
 import { useEffect, useRef, useState } from "react";
 import { io, Socket } from "socket.io-client";
 import * as Y from "yjs";
@@ -32,8 +31,6 @@ function useCollabSession(): UseCollabSessionReturn {
   const { roomId } = useParams<{ roomId: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useAuthStore();
-
   const socketRef = useRef<Socket | null>(null);
   const ydocRef = useRef<Y.Doc | null>(null);
   const bindingRef = useRef<MonacoBinding | null>(null);
@@ -56,10 +53,10 @@ function useCollabSession(): UseCollabSessionReturn {
     const ydoc = new Y.Doc();
     ydocRef.current = ydoc;
 
-    // 2. Connect to collab service
+    // 2. Connect to collab service — JWT rides along in the httpOnly auth_token cookie
     const socket = io(COLLAB_URL, {
-      auth: { token },
       query: { roomId },
+      withCredentials: true,
     });
 
     socketRef.current = socket;
@@ -110,7 +107,7 @@ function useCollabSession(): UseCollabSessionReturn {
       socketRef.current = null;
       setSocket(null);
     };
-  }, [token, roomId]);
+  }, [roomId]);
 
   const handleEditorMount: OnMount = function (editor) {
     if (!ydocRef.current) return;

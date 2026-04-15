@@ -13,6 +13,7 @@ interface fetchUserParams {
 async function loginUser(email: string, password: string) {
   const response = await fetch(`${BASE_URL}/api/auth/login`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
   });
@@ -122,6 +123,7 @@ async function searchUser(userId: string) {
 async function registerUser(userName: string, email: string, password: string) {
   const response = await fetch(`${BASE_URL}/api/auth/register`, {
     method: "POST",
+    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ userName, email, password }),
   });
