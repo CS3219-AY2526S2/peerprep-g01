@@ -1,12 +1,5 @@
 import { useState } from "react";
-import {
-  Box,
-  TableRow,
-  TableCell,
-  Typography,
-  IconButton,
-} from "@mui/material";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Box, TableRow, TableCell, Typography } from "@mui/material";
 import AdminSideMenu from "../../features/admin/AdminSideMenu";
 import AdminTable from "../../features/admin/AdminTable";
 import SearchBar from "../../components/SearchBar";
@@ -21,11 +14,9 @@ const TABLE_FIELDS = [
   "Room-ID",
   "User One",
   "User Two",
+  "Question",
   "Topic",
   "Difficulty",
-  "Question",
-  "Status",
-  "",
 ];
 
 const DIFFICULTY_COLOR: Record<string, Color> = {
@@ -39,9 +30,6 @@ function ManageRoomPage() {
   const [selectedRoom, setSelectedRoom] = useState<Room | null>(null);
 
   function renderRow(room: Room) {
-    const connectedCount = room.connectedCount ?? 0;
-    const status = connectedCount === 2 ? "Active" : "Not-Active";
-
     return (
       <TableRow key={room.roomId} hover sx={{ cursor: "default" }}>
         <TableCell>{room.roomId}</TableCell>
@@ -49,6 +37,12 @@ function ManageRoomPage() {
         <TableCell>{room.userOneId}</TableCell>
 
         <TableCell>{room.userTwoId}</TableCell>
+
+        <TableCell>
+          <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>
+            {room.question.questionName}
+          </Typography>
+        </TableCell>
 
         <TableCell>
           <ChipAttribute label={room.question.topicName} color={grey} />
@@ -62,27 +56,6 @@ function ManageRoomPage() {
             }
             color={DIFFICULTY_COLOR[room.question.difficulty] ?? grey}
           />
-        </TableCell>
-
-        <TableCell>
-          <Typography variant="body2" noWrap sx={{ maxWidth: 220 }}>
-            {room.question.questionName}
-          </Typography>
-        </TableCell>
-
-        <TableCell>
-          <Typography
-            variant="body2"
-            color={status === "Active" ? "success.main" : "text.secondary"}
-          >
-            {status}
-          </Typography>
-        </TableCell>
-
-        <TableCell align="right" sx={{ whiteSpace: "nowrap" }}>
-          <IconButton size="small" onClick={() => setSelectedRoom(room)}>
-            <ChevronRightIcon fontSize="small" />
-          </IconButton>
         </TableCell>
       </TableRow>
     );
