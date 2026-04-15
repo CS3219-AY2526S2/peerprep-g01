@@ -6,12 +6,19 @@ import {
   CardContent,
   Chip,
   Grid,
+  Divider,
+  CircularProgress,
+  Stack,
 } from "@mui/material";
 import GroupsIcon from "@mui/icons-material/Groups";
+import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
+import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import PageHeader from "../features/user/PageHeader";
 import useMatch from "../hooks/useMatch";
 import MatchLoadingDialog from "../features/user/MatchLoadingDialog";
 import MatchFoundDialog from "../features/user/MatchFoundDialog";
+import useUserHistory from "../hooks/useUserHistory";
+import { useEffect } from "react";
 
 const DIFFICULTIES = [
   {
@@ -60,6 +67,12 @@ const HOW_IT_WORKS = [
   },
 ];
 
+const DIFFICULTY_COLORS: Record<string, { color: string; bg: string }> = {
+  Easy: { color: "#00a804", bg: "#e6f9e6" },
+  Medium: { color: "#c97200", bg: "#fff3e0" },
+  Hard: { color: "#d32f2f", bg: "#fdecea" },
+};
+
 function UserHomePage() {
   const {
     user,
@@ -78,6 +91,21 @@ function UserHomePage() {
     handleCancelMatch,
     handleEnterRoom,
   } = useMatch();
+
+  const {
+    history,
+    isLoading: historyLoading,
+    error: historyError,
+    loadHistory,
+  } = useUserHistory();
+
+  const userId = user?.userId;
+
+  useEffect(() => {
+    if (userId) loadHistory(userId);
+    // loadHistory has no useCallback — userId is the only meaningful dep
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
 
   const isAdmin = user?.role === "2" || user?.role === "3";
 
@@ -107,184 +135,387 @@ function UserHomePage() {
           Select a topic and difficulty, then match with another coder to solve
           problems together
         </Typography>
-        {/* <Box sx={{
-          display: "inline-flex", alignItems: "center", gap: 0.5, mt: 1.5,
-          px: 1.5, py: 0.5, bgcolor: "#e8f5e9", borderRadius: 20,
-        }}>
-          <Typography variant="caption" sx={{ color: "#388e3c", fontWeight: 600 }}>
-            1267 online now
-          </Typography>
-        </Box> */}
       </Box>
 
-      {/* Main content */}
-      <Box sx={{ maxWidth: 1000, mx: "auto", px: 2 }}>
-        <Card variant="outlined" sx={{ borderRadius: 3, p: 1 }}>
-          <CardContent>
-            <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 1.5 }}>
-              Choose Your Challenge
-            </Typography>
-
-            {/*Topic Picker*/}
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mb: 1, display: "block" }}
-            >
-              Select Topic
-            </Typography>
-
-            {topicLoading ? (
-              <Typography variant="caption" color="text.secondary">
-                Loading Topics...
-              </Typography>
-            ) : topicError ? (
-              <Box sx={{ mb: 3, textAlign: "center" }}>
-                <Typography variant="body2" color="error" sx={{ mb: 1 }}>
-                  Failed to load topics.
+      {/* Main content — two-column layout */}
+      <Box sx={{ maxWidth: 1200, mx: "auto", px: 2 }}>
+        <Grid container spacing={2} alignItems="flex-start">
+          {/* LEFT: Match configuration card (65%) */}
+          <Grid size={{ xs: 12, md: 7.5 }}>
+            <Card variant="outlined" sx={{ borderRadius: 3, p: 1 }}>
+              <CardContent>
+                <Typography
+                  variant="subtitle1"
+                  fontWeight={600}
+                  sx={{ mb: 1.5 }}
+                >
+                  Choose Your Challenge
                 </Typography>
-                <Button size="small" variant="outlined" onClick={retryTopics}>
-                  Retry
-                </Button>
-              </Box>
-            ) : (
-              <Grid container spacing={4} sx={{ mb: 3 }}>
-                {topics.map((t) => {
-                  const selected = selectedTopics.some(
-                    (s) => s.topicId === t.topicId,
-                  );
-                  return (
-                    <Grid size={{ xs: 6, md: 3 }} key={t.topicId}>
-                      <Box
-                        onClick={() => toggleTopic(t)}
-                        sx={{
-                          border: selected
-                            ? "2px solid #1976d2"
-                            : "1px solid #e0e0e0",
-                          bgcolor: selected ? "#97d2fb" : "#fff",
-                          borderRadius: 2,
-                          p: 1.5,
-                          textAlign: "center",
-                          cursor: "pointer",
-                          transition: "all 0.15s",
-                          "&:hover": { borderColor: "#1972d2" },
-                        }}
-                      >
-                        <Typography
-                          variant="body2"
-                          fontWeight={600}
-                          fontSize={13}
-                        >
-                          {t.topicName}
-                        </Typography>
-                      </Box>
-                    </Grid>
-                  );
-                })}
-              </Grid>
-            )}
-
-            {/* Difficulty Picker*/}
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ mb: 1, display: "block" }}
-            >
-              Select Difficulty
-            </Typography>
-            <Grid container spacing={1.5} sx={{ mb: 3 }}>
-              {DIFFICULTIES.map((d) => {
-                const selected = selectedDifficulty === d.label;
-                return (
-                  <Grid key={d.label} size={{ xs: 12, sm: 4 }}>
-                    <Box
-                      onClick={() => setSelectedDifficulty(d.label)}
-                      sx={{
-                        border: selected
-                          ? `2px solid ${d.colors}`
-                          : "1px solid #e0e0e0",
-                        bgcolor: selected ? d.bg : "#ffffff",
-                        borderRadius: 2,
-                        p: 1.5,
-                        textAlign: "center",
-                        cursor: "pointer",
-                        transition: "all 0.15s",
-                        "&:hover": { borderColor: d.colors },
-                      }}
+                {/*Topic Picker*/}
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mb: 1, display: "block" }}
+                >
+                  Select Topic
+                </Typography>
+                {topicLoading ? (
+                  <Typography variant="caption" color="text.secondary">
+                    Loading Topics...
+                  </Typography>
+                ) : topicError ? (
+                  <Box sx={{ mb: 3, textAlign: "center" }}>
+                    <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+                      Failed to load topics.
+                    </Typography>
+                    <Button
+                      size="small"
+                      variant="outlined"
+                      onClick={retryTopics}
                     >
-                      <Typography fontSize={24}>{d.emoji}</Typography>
-                      <Typography variant="body2" fontWeight={600}>
-                        {" "}
-                        {d.label}{" "}
-                      </Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        {d.Subtitle}
-                      </Typography>
-                    </Box>
+                      Retry
+                    </Button>
+                  </Box>
+                ) : (
+                  <Grid container spacing={4} sx={{ mb: 3 }}>
+                    {topics.map((t) => {
+                      const selected = selectedTopics.some(
+                        (s) => s.topicId === t.topicId,
+                      );
+                      return (
+                        <Grid size={{ xs: 6, md: 3 }} key={t.topicId}>
+                          <Box
+                            onClick={() => toggleTopic(t)}
+                            sx={{
+                              border: selected
+                                ? "2px solid #1976d2"
+                                : "1px solid #e0e0e0",
+                              bgcolor: selected ? "#97d2fb" : "#fff",
+                              borderRadius: 2,
+                              p: 1.5,
+                              textAlign: "center",
+                              cursor: "pointer",
+                              transition: "all 0.15s",
+                              "&:hover": { borderColor: "#1972d2" },
+                            }}
+                          >
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              fontSize={13}
+                            >
+                              {t.topicName}
+                            </Typography>
+                          </Box>
+                        </Grid>
+                      );
+                    })}
                   </Grid>
-                );
-              })}
-            </Grid>
-
-            {/* Selected Chips*/}
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "flex-start",
-                gap: 1,
-                mb: 2,
-              }}
-            >
-              <Typography variant="body2" fontWeight={600} fontSize={13}>
-                Selected:{" "}
-              </Typography>
-              <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-                {selectedTopics.map((t) => (
+                )}
+                {/* Difficulty Picker*/}
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ mb: 1, display: "block" }}
+                >
+                  Select Difficulty
+                </Typography>
+                <Grid container spacing={1.5} sx={{ mb: 3 }}>
+                  {DIFFICULTIES.map((d) => {
+                    const selected = selectedDifficulty === d.label;
+                    return (
+                      <Grid key={d.label} size={{ xs: 12, sm: 4 }}>
+                        <Box
+                          onClick={() => setSelectedDifficulty(d.label)}
+                          sx={{
+                            border: selected
+                              ? `2px solid ${d.colors}`
+                              : "1px solid #e0e0e0",
+                            bgcolor: selected ? d.bg : "#ffffff",
+                            borderRadius: 2,
+                            p: 1.5,
+                            textAlign: "center",
+                            cursor: "pointer",
+                            transition: "all 0.15s",
+                            "&:hover": { borderColor: d.colors },
+                          }}
+                        >
+                          <Typography fontSize={24}>{d.emoji}</Typography>
+                          <Typography variant="body2" fontWeight={600}>
+                            {" "}
+                            {d.label}{" "}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {d.Subtitle}
+                          </Typography>
+                        </Box>
+                      </Grid>
+                    );
+                  })}
+                </Grid>
+                {/* Selected Chips*/}
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "flex-start",
+                    gap: 1,
+                    mb: 2,
+                  }}
+                >
+                  <Typography variant="body2" fontWeight={600} fontSize={13}>
+                    Selected:{" "}
+                  </Typography>
+                  <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+                    {selectedTopics.map((t) => (
+                      <Chip
+                        key={t.topicId}
+                        label={t.topicName}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Box>
                   <Chip
-                    key={t.topicId}
-                    label={t.topicName}
+                    label={selectedDifficulty}
                     size="small"
                     color="primary"
                     variant="outlined"
                   />
-                ))}
-              </Box>
-              <Chip
-                label={selectedDifficulty}
-                size="small"
-                color="primary"
-                variant="outlined"
-              />
-            </Box>
+                </Box>
+                {/*Button*/}
+                <Box sx={{ textAlign: "center" }}>
+                  <Button
+                    onClick={handleMatchRequest}
+                    variant="contained"
+                    size="large"
+                    startIcon={<GroupsIcon />}
+                    sx={{
+                      borderRadius: 3,
+                      px: 4,
+                      textTransform: "none",
+                      fontWeight: 600,
+                      py: 1.5,
+                    }}
+                  >
+                    Find Partner & Start Coding
+                  </Button>
+                  <Typography
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ display: "block", mt: 1 }}
+                  >
+                    You'll be matched with someone of similar skill
+                  </Typography>
+                </Box>
+              </CardContent>
+            </Card>
+          </Grid>
 
-            {/*Button*/}
-            <Box sx={{ textAlign: "center" }}>
-              <Button
-                onClick={handleMatchRequest}
-                variant="contained"
-                size="large"
-                startIcon={<GroupsIcon />}
-                sx={{
-                  borderRadius: 3,
-                  px: 4,
-                  textTransform: "none",
-                  fontWeight: 600,
-                  py: 1.5,
-                }}
-              >
-                Find Partner & Start Coding
-              </Button>
-              <Typography
-                variant="caption"
-                color="text.secondary"
-                sx={{ display: "block", mt: 1 }}
-              >
-                You'll be matched with someone of similar skill
-              </Typography>
-            </Box>
-          </CardContent>
-        </Card>
+          {/* RIGHT: Attempt history panel (35%) */}
+          <Grid size={{ xs: 12, md: 4.5 }}>
+            <Card
+              variant="outlined"
+              sx={{
+                borderRadius: 3,
+                display: "flex",
+                flexDirection: "column",
+                // Match the left card's approximate height by capping with overflow
+                maxHeight: 600,
+                height: "100%",
+              }}
+            >
+              <Box sx={{ px: 2.5, pt: 2.5, pb: 1.5, flexShrink: 0 }}>
+                <Typography variant="subtitle1" fontWeight={600}>
+                  My Attempt History
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Your recent coding sessions
+                </Typography>
+              </Box>
+              <Divider />
+
+              {/* Scrollable list */}
+              <Box sx={{ flex: 1, overflowY: "auto", px: 2, py: 1 }}>
+                {historyLoading ? (
+                  <Box
+                    sx={{ display: "flex", justifyContent: "center", py: 4 }}
+                  >
+                    <CircularProgress size={28} />
+                  </Box>
+                ) : historyError ? (
+                  <Typography
+                    variant="body2"
+                    color="error"
+                    sx={{ py: 3, textAlign: "center" }}
+                  >
+                    Failed to load history.
+                  </Typography>
+                ) : history.length === 0 ? (
+                  <Box sx={{ py: 4, textAlign: "center" }}>
+                    <Typography variant="body2" color="text.secondary">
+                      No attempts yet.
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Complete a session to see your history here.
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Stack divider={<Divider />} spacing={0}>
+                    {history.map((entry) => {
+                      const diffStyle = DIFFICULTY_COLORS[
+                        entry.difficulty ?? ""
+                      ] ?? {
+                        color: "#757575",
+                        bg: "#f5f5f5",
+                      };
+                      const isCompleted = entry.attemptStatus === "completed";
+
+                      return (
+                        <Box
+                          key={entry.historyId}
+                          sx={{
+                            py: 1.5,
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: 0.5,
+                          }}
+                        >
+                          {/* Question name + status icon */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              alignItems: "flex-start",
+                              gap: 1,
+                            }}
+                          >
+                            {isCompleted ? (
+                              <CheckCircleOutlineIcon
+                                fontSize="small"
+                                sx={{
+                                  color: "#2e7d32",
+                                  mt: "1px",
+                                  flexShrink: 0,
+                                }}
+                              />
+                            ) : (
+                              <RadioButtonUncheckedIcon
+                                fontSize="small"
+                                sx={{
+                                  color: "#9e9e9e",
+                                  mt: "1px",
+                                  flexShrink: 0,
+                                }}
+                              />
+                            )}
+                            <Typography
+                              variant="body2"
+                              fontWeight={600}
+                              sx={{
+                                lineHeight: 1.4,
+                                color: entry.questionName
+                                  ? "text.primary"
+                                  : "text.disabled",
+                                fontStyle: entry.questionName
+                                  ? "normal"
+                                  : "italic",
+                              }}
+                            >
+                              {entry.questionName ?? entry.questionId}
+                              {!entry.questionName && (
+                                <Typography
+                                  component="span"
+                                  variant="caption"
+                                  sx={{
+                                    ml: 0.5,
+                                    color: "text.disabled",
+                                    fontStyle: "italic",
+                                  }}
+                                >
+                                  (Deleted question)
+                                </Typography>
+                              )}
+                            </Typography>
+                          </Box>
+
+                          {/* Chips row */}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 0.75,
+                              flexWrap: "wrap",
+                              pl: 3.5,
+                            }}
+                          >
+                            {/* Topic */}
+                            {entry.topicName && (
+                              <Chip
+                                label={entry.topicName}
+                                size="small"
+                                sx={{
+                                  fontSize: 11,
+                                  height: 20,
+                                  bgcolor: "#e3f2fd",
+                                  color: "#1565c0",
+                                  border: "none",
+                                }}
+                              />
+                            )}
+                            {/* Difficulty */}
+                            {entry.difficulty && (
+                              <Chip
+                                label={entry.difficulty}
+                                size="small"
+                                sx={{
+                                  fontSize: 11,
+                                  height: 20,
+                                  bgcolor: diffStyle.bg,
+                                  color: diffStyle.color,
+                                  border: "none",
+                                }}
+                              />
+                            )}
+                            {/* Status */}
+                            <Chip
+                              label={isCompleted ? "Completed" : "Attempted"}
+                              size="small"
+                              sx={{
+                                fontSize: 11,
+                                height: 20,
+                                bgcolor: isCompleted ? "#e8f5e9" : "#f5f5f5",
+                                color: isCompleted ? "#2e7d32" : "#757575",
+                                border: "none",
+                              }}
+                            />
+                          </Box>
+
+                          {/* Date */}
+                          <Typography
+                            variant="caption"
+                            color="text.disabled"
+                            sx={{ pl: 3.5 }}
+                          >
+                            {entry.sessionEndAt
+                              ? new Date(entry.sessionEndAt).toLocaleDateString(
+                                  undefined,
+                                  {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric",
+                                  },
+                                )
+                              : "--"}
+                          </Typography>
+                        </Box>
+                      );
+                    })}
+                  </Stack>
+                )}
+              </Box>
+            </Card>
+          </Grid>
+        </Grid>
       </Box>
 
       {/* How it works */}
@@ -292,7 +523,7 @@ function UserHomePage() {
         sx={{
           mx: "auto",
           mt: 3,
-          maxWidth: 940,
+          maxWidth: 1200,
           bgcolor: "#c6dcf850",
           borderRadius: 3,
           p: 4,
