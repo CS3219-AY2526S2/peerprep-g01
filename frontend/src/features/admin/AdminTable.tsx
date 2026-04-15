@@ -75,7 +75,7 @@ function AdminTable<T>({
         bgcolor: "grey.100",
         p: 3,
         display: "flex",
-        justifyContent: "flex-end",
+        justifyContent: "flex-start",
         alignContent: "center",
       }}
     >
@@ -117,7 +117,10 @@ function AdminTable<T>({
             <TableHead>
               <TableRow sx={{ bgcolor: "grey.50" }}>
                 {tableFields.map((item, index) => (
-                  <TableCell key={index} sx={{ fontWeight: 500, py: 1, px: 2, whiteSpace: "nowrap" }}>
+                  <TableCell
+                    key={index}
+                    sx={{ fontWeight: 500, py: 1, px: 2, whiteSpace: "nowrap" }}
+                  >
                     {item}
                   </TableCell>
                 ))}
