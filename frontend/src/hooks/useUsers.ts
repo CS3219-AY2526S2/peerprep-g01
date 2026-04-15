@@ -89,6 +89,7 @@ function useUsers() {
     error,
     loadUsers,
     cursorOffset,
+    hasMore,
     loadNextUsers,
     deleteUser,
     deletingUserId,
