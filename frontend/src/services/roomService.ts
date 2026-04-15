@@ -6,7 +6,7 @@ export interface Room {
   sessionId: string;
   userOneId: string;
   userTwoId: string;
-  question: MatchQuestion;
+  question: MatchQuestion | null;
   connectedCount: number;
   createdAt: string;
 }
