@@ -14,6 +14,7 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import MeetingRoomIcon from "@mui/icons-material/MeetingRoom";
 import LogoutIcon from "@mui/icons-material/Logout";
+import SwitchLeftIcon from "@mui/icons-material/SwitchLeft";
 import { useNavigate, useLocation } from "react-router-dom";
 import useAuth from "../../hooks/useAuth";
 import { useState } from "react";
@@ -109,6 +110,20 @@ function AdminSideMenu() {
       </List>
 
       <List>
+        <ListItem disablePadding sx={{ px: 1 }}>
+          <ListItemButton
+            onClick={() => navigate("/home")}
+            sx={{
+              justifyContent: isCollapsed ? "center" : "flex-start",
+              minHeight: 48,
+            }}
+          >
+            <ListItemIcon sx={{ minWidth: isCollapsed ? "unset" : 40 }}>
+              <SwitchLeftIcon />
+            </ListItemIcon>
+            {!isCollapsed && <ListItemText primary="User View" />}
+          </ListItemButton>
+        </ListItem>
         <ListItem disablePadding sx={{ px: 1 }}>
           <ListItemButton
             onClick={() => setLogoutOpen(true)}

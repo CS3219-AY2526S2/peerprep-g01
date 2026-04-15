@@ -48,6 +48,26 @@ async function fetchQuestions(params: fetchQuestionParams = {}) {
   return response.json();
 }
 
+async function fetchQuestionById(questionId: string): Promise<{
+  status: string;
+  data: Question & { topicName: string };
+}> {
+  const response = await apiFetch(`${BASE_URL}/api/questions/${questionId}`);
+
+  if (!response.ok) {
+    let message = `Fetch question (${questionId}) failed`;
+    try {
+      const err = await response.json();
+      message = err.message ?? err.error ?? message;
+    } catch {
+      message = response.statusText || message;
+    }
+    throw new Error(message);
+  }
+
+  return response.json();
+}
+
 async function deleteQuestion(questionId: string) {
   const response = await apiFetch(`${BASE_URL}/api/questions/${questionId}`, {
     method: "DELETE",
@@ -118,9 +138,11 @@ async function updateQuestion(
   return response.json();
 }
 
-async function fetchTopics(): Promise<{ data: { topicId: string; topicName: string}[] }> {
+async function fetchTopics(): Promise<{
+  data: { topicId: string; topicName: string }[];
+}> {
   const response = await apiFetch(`${BASE_URL}/api/questions/topic`);
-  if(!response.ok) {
+  if (!response.ok) {
     let message = "Fetch topics request failed";
     try {
       const err = await response.json();
@@ -133,4 +155,11 @@ async function fetchTopics(): Promise<{ data: { topicId: string; topicName: stri
   return response.json();
 }
 
-export { fetchQuestions, deleteQuestion, updateQuestion, addQuestion, fetchTopics };
+export {
+  fetchQuestions,
+  fetchQuestionById,
+  deleteQuestion,
+  updateQuestion,
+  addQuestion,
+  fetchTopics,
+};
