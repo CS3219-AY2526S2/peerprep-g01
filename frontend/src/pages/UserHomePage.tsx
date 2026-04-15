@@ -67,6 +67,8 @@ function UserHomePage() {
     user,
     topics,
     topicLoading,
+    topicError,
+    retryTopics,
     selectedTopics,
     toggleTopic,
     selectedDifficulty,
@@ -149,9 +151,17 @@ function UserHomePage() {
 
             {topicLoading ? (
               <Typography variant="caption" color="text.secondary">
-                {" "}
                 Loading Topics...
               </Typography>
+            ) : topicError ? (
+              <Box sx={{ mb: 3, textAlign: "center" }}>
+                <Typography variant="body2" color="error" sx={{ mb: 1 }}>
+                  Failed to load topics.
+                </Typography>
+                <Button size="small" variant="outlined" onClick={retryTopics}>
+                  Retry
+                </Button>
+              </Box>
             ) : (
               <Grid container spacing={4} sx={{ mb: 3 }}>
                 {topics.map((t) => {

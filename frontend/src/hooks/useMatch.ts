@@ -37,6 +37,8 @@ export interface UseMatchReturn {
   user: User | null;
   topics: Topic[];
   topicLoading: boolean;
+  topicError: boolean;
+  retryTopics: () => void;
   selectedTopics: Topic[];
   toggleTopic: (topic: Topic) => void;
   selectedDifficulty: string | null;
@@ -57,6 +59,7 @@ function useMatch(): UseMatchReturn {
 
   const [topics, setTopics] = useState<Topic[]>([]);
   const [topicLoading, setTopicsLoading] = useState(true);
+  const [topicError, setTopicError] = useState(false);
   const [selectedTopics, setSelectedTopics] = useState<Topic[]>([]);
 
   function toggleTopic(topic: Topic) {
@@ -106,8 +109,9 @@ function useMatch(): UseMatchReturn {
     }, 1000);
   }
 
-  // fetch topics on mount
-  useEffect(() => {
+  function loadTopics() {
+    setTopicsLoading(true);
+    setTopicError(false);
     fetchTopics()
       .then((res) => {
         const { data } = res;
@@ -115,8 +119,14 @@ function useMatch(): UseMatchReturn {
       })
       .catch((err) => {
         console.error("fetchTopics failed:", err);
+        setTopicError(true);
       })
       .finally(() => setTopicsLoading(false));
+  }
+
+  // fetch topics on mount
+  useEffect(() => {
+    loadTopics();
   }, []);
 
   // clean up on unmount
@@ -209,6 +219,8 @@ function useMatch(): UseMatchReturn {
     toggleTopic,
     topics,
     topicLoading,
+    topicError,
+    retryTopics: loadTopics,
     selectedDifficulty,
     setSelectedDifficulty,
     matchState,
