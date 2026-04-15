@@ -21,12 +21,8 @@ function useAuth() {
         navigate("/admin/manage-admin");
       }
       return true;
-    } catch (err) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        console.log("An unexpected error occurred");
-      }
+    } catch {
+      setError("Invalid email or password");
       return false;
     } finally {
       setIsLoading(false);
