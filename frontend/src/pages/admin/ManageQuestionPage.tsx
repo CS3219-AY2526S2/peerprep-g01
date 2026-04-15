@@ -49,6 +49,7 @@ function ManageQuestionPage() {
   } = useQuestion();
 
   const [deleteTarget, setDeleteTarget] = useState<Question | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [editTarget, setEditTarget] = useState<Question | null>(null);
   const [addFormOpen, setAddFormOpen] = useState(false);
 
@@ -60,17 +61,24 @@ function ManageQuestionPage() {
   async function handleSearchSubmit() {}
 
   function handleDeleteClick(question: Question) {
+    setDeleteError(null);
     setDeleteTarget(question);
   }
 
   async function handleConfirmDelete() {
     if (!deleteTarget) return;
-    await deleteQuestion(deleteTarget.questionId);
-    setDeleteTarget(null);
+    try {
+      await deleteQuestion(deleteTarget.questionId);
+      setDeleteTarget(null);
+    } catch (err) {
+      if (err instanceof Error) setDeleteError(err.message);
+      else setDeleteError("Failed to delete question.");
+    }
   }
 
   function handleCancelDelete() {
     setDeleteTarget(null);
+    setDeleteError(null);
   }
 
   async function handleConfirmAdd(
@@ -79,8 +87,12 @@ function ManageQuestionPage() {
       "questionId" | "createdAt" | "modifiedAt" | "createdBy" | "modifiedBy"
     >,
   ) {
-    await addQuestion(question);
-    setAddFormOpen(false);
+    try {
+      await addQuestion(question);
+      setAddFormOpen(false);
+    } catch {
+      // keep form open; table stays intact
+    }
   }
 
   function handleCancelAdd() {
@@ -97,8 +109,12 @@ function ManageQuestionPage() {
       "createdAt" | "modifiedAt" | "createdBy" | "modifiedBy"
     >,
   ) {
-    await editQuestion(question);
-    setEditTarget(null);
+    try {
+      await editQuestion(question);
+      setEditTarget(null);
+    } catch {
+      // keep form open; table stays intact
+    }
   }
 
   function handleCancelEdit() {
@@ -182,6 +198,7 @@ function ManageQuestionPage() {
         confirmLabel="Delete"
         confirmColor="error"
         isLoading={!!deletingQuestionId}
+        errorMessage={deleteError}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
       />

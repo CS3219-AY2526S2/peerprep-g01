@@ -43,14 +43,9 @@ function useAdmins() {
 
   async function createAdmin(email: string) {
     setIsCreating(true);
-    setError(null);
     try {
       await createAdminService(email);
       await loadAdmins(page);
-    } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else console.log("An unexpected error occurred");
-      throw err;
     } finally {
       setIsCreating(false);
     }
@@ -58,13 +53,9 @@ function useAdmins() {
 
   async function deleteAdmin(email: string, userId: string) {
     setDeletingUserId(userId);
-    setError(null);
     try {
       await deleteAdminService(email, userId);
       await loadAdmins(page);
-    } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else console.log("An unexpected error occurred");
     } finally {
       setDeletingUserId(null);
     }

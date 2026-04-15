@@ -55,6 +55,7 @@ function ManageAdminPage() {
   const isSuperAdmin = currentUser?.role === "3";
 
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [newAdminEmail, setNewAdminEmail] = useState("");
   const [addError, setAddError] = useState<string | null>(null);
@@ -64,13 +65,24 @@ function ManageAdminPage() {
   }, []);
 
   function handleDeleteClick(admin: User) {
+    setDeleteError(null);
     setDeleteTarget(admin);
   }
 
   async function handleConfirmDelete() {
     if (!deleteTarget) return;
-    await deleteAdmin(deleteTarget.email, deleteTarget.userId);
+    try {
+      await deleteAdmin(deleteTarget.email, deleteTarget.userId);
+      setDeleteTarget(null);
+    } catch (err) {
+      if (err instanceof Error) setDeleteError(err.message);
+      else setDeleteError("Failed to delete admin.");
+    }
+  }
+
+  function handleCancelDelete() {
     setDeleteTarget(null);
+    setDeleteError(null);
   }
 
   function handleOpenAdd() {
@@ -154,8 +166,9 @@ function ManageAdminPage() {
         confirmLabel="Delete"
         confirmColor="error"
         isLoading={!!deletingUserId}
+        errorMessage={deleteError}
         onConfirm={handleConfirmDelete}
-        onCancel={() => setDeleteTarget(null)}
+        onCancel={handleCancelDelete}
       />
 
       <Dialog

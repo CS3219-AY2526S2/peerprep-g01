@@ -43,13 +43,6 @@ function useQuestion() {
     try {
       await deleteQuestionRequest(questionId);
       await loadQuestions();
-    } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else {
-        console.log(
-          "An unexpected error occurred while attempting to delete question",
-        );
-      }
     } finally {
       setDeletingQuestionId(null);
     }
@@ -62,17 +55,9 @@ function useQuestion() {
     >,
   ) {
     setIsAdding(true);
-
     try {
       await addQuestionRequest(question);
       await loadQuestions();
-    } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else {
-        console.log(
-          "An unexpected error occurred while attempting to add question",
-        );
-      }
     } finally {
       setIsAdding(false);
     }
@@ -85,16 +70,9 @@ function useQuestion() {
     >,
   ) {
     setIsEditing(true);
-
     try {
       await editQuestionRequest(question);
       await loadQuestions();
-    } catch (err) {
-      if (err instanceof Error) setError(err.message);
-      else
-        console.log(
-          "An unexpected error occurred while attempting to add question",
-        );
     } finally {
       setIsEditing(false);
     }

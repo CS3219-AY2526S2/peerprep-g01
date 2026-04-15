@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   CircularProgress,
   IconButton,
@@ -52,6 +53,7 @@ function ManageUserPage() {
   } = useUserHistory();
 
   const [confirmTarget, setConfirmTarget] = useState<User | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [historyTarget, setHistoryTarget] = useState<User | null>(null);
 
   useEffect(() => {
@@ -59,17 +61,24 @@ function ManageUserPage() {
   }, []);
 
   function handleDeleteClick(user: User) {
+    setDeleteError(null);
     setConfirmTarget(user);
   }
 
   async function handleConfirmDelete() {
     if (!confirmTarget) return;
-    await deleteUser(confirmTarget.userId);
-    setConfirmTarget(null);
+    try {
+      await deleteUser(confirmTarget.userId);
+      setConfirmTarget(null);
+    } catch (err) {
+      if (err instanceof Error) setDeleteError(err.message);
+      else setDeleteError("Failed to delete user.");
+    }
   }
 
   function handleCancelDelete() {
     setConfirmTarget(null);
+    setDeleteError(null);
   }
 
   function handleHistoryClick(user: User) {
@@ -157,6 +166,11 @@ function ManageUserPage() {
             <strong>{confirmTarget?.userName}</strong> ({confirmTarget?.email})?
             This action cannot be undone.
           </DialogContentText>
+          {deleteError && (
+            <Alert severity="error" sx={{ mt: 2 }}>
+              {deleteError}
+            </Alert>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCancelDelete}>Cancel</Button>
